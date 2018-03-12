@@ -4,7 +4,7 @@ import PouchDB from 'pouchdb'
 import slug from 'slug'
 import SlothURI from './SlothURI'
 
-export interface SlothDatabasesOptions<T, P> {
+export interface SlothDatabaseOptions<T, P> {
   schema: ObjectSchema
   defaults?: Partial<T>
   factory?: PouchFactory
@@ -18,9 +18,9 @@ export interface SlothDatabasesOptions<T, P> {
 }
 
 export default class SlothDatabase<T, P> {
-  opts: SlothDatabasesOptions<T, P>
+  opts: SlothDatabaseOptions<T, P>
 
-  constructor(opts: SlothDatabasesOptions<T, P>) {
+  constructor(opts: SlothDatabaseOptions<T, P>) {
     this.opts = Object.assign(
       {
         factory: (name: string) => new PouchDB(name),
