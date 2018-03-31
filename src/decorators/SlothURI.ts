@@ -35,6 +35,14 @@ export default function SlothURI<T>(prefix: string, ...propsKeys: (keyof T)[]) {
 
     Reflect.deleteProperty(target, key)
 
+    const { uris } = getSlothData(target)
+
+    uris.push({
+      name: key,
+      prefix,
+      propsKeys
+    })
+
     Reflect.defineProperty(target, key, {
       get: () => {
         const { slug } = getSlothData(target)

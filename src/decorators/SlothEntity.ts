@@ -15,6 +15,7 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
             updatedProps: {},
             props: {},
             docId: idOrProps,
+            uris: [],
             slug
           }
         } else {
@@ -23,6 +24,7 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
             updatedProps: {},
             props: idOrProps,
             docId: idOrProps._id,
+            uris: [],
             slug
           }
         }

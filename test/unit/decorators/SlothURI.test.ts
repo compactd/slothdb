@@ -4,17 +4,19 @@ import slug from 'slug'
 test('SlothURI - returns correct url', () => {
   const object = {
     _id: '',
-    valueInProp: '',
-    updatedValue: '',
+    valueInProp: 'notfoobar',
+    updatedValue: 'notbarbarz',
     defaultedValue: 'ouch',
     sloth: {
       props: {
-        valueInProp: 'foobar'
+        valueInProp: 'foobar',
+        updatedValue: 'notbarbarz'
       },
       updatedProps: {
         updatedValue: 'barbarz'
       },
-      slug
+      slug,
+      uris: []
     }
   }
 
@@ -25,4 +27,28 @@ test('SlothURI - returns correct url', () => {
   }>('objects', 'valueInProp', 'updatedValue', 'defaultedValue')(object, '_id')
 
   expect(object._id).toBe('objects/foobar/barbarz/ouch')
+})
+
+test('SlothURI - pushes to uris', () => {
+  const object = {
+    _id: '',
+    sloth: {
+      props: {},
+      updatedProps: {},
+      uris: []
+    }
+  }
+
+  SlothURI<{
+    foo: string
+    bar: string
+  }>('objects', 'foo', 'bar')(object, '_id')
+
+  expect(object.sloth.uris).toEqual([
+    {
+      name: '_id',
+      prefix: 'objects',
+      propsKeys: ['foo', 'bar']
+    }
+  ])
 })
