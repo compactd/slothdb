@@ -3,4 +3,5 @@ export default interface SlothData<S> {
   props: Partial<S>
   updatedProps: Partial<S>
   docId?: string
+  slug: (str: string) => string
 }

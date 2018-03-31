@@ -1,5 +1,6 @@
 import BaseEntity from '../models/BaseEntity'
 import SlothData from '../models/SlothData'
+import slug from 'slug'
 
 export default function SlothEntity<S extends { _id: string }>(name: string) {
   return (target: Function) => {
@@ -13,14 +14,16 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
             name,
             updatedProps: {},
             props: {},
-            docId: idOrProps
+            docId: idOrProps,
+            slug
           }
         } else {
           this.sloth = {
             name,
             updatedProps: {},
             props: idOrProps,
-            docId: idOrProps._id
+            docId: idOrProps._id,
+            slug
           }
         }
       }
