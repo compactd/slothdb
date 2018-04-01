@@ -34,17 +34,20 @@ test('SlothURI - pushes to uris', () => {
     _id: '',
     sloth: {
       props: {},
-      updatedProps: {},
-      uris: []
+      updatedProps: {}
     }
+  }
+
+  const desc = {
+    uris: []
   }
 
   SlothURI<{
     foo: string
     bar: string
-  }>('objects', 'foo', 'bar')(object, '_id')
+  }>('objects', 'foo', 'bar')({ desc }, '_id')
 
-  expect(object.sloth.uris).toEqual([
+  expect(desc.uris).toEqual([
     {
       name: '_id',
       prefix: 'objects',

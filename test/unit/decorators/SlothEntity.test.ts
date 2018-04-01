@@ -4,7 +4,7 @@ test('SlothEntity - attaches a sloth object to class', () => {
   // tslint:disable-next-line:no-empty
   const constr = () => {}
 
-  const wrapper = SlothEntity('foo')(constr)
+  const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
   wrapper.call(context, 'foos/foo')
@@ -16,7 +16,7 @@ test('SlothEntity - set the name using the passed argument', () => {
   // tslint:disable-next-line:no-empty
   const constr = () => {}
 
-  const wrapper = SlothEntity('foo')(constr)
+  const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
   wrapper.call(context, 'foos/foo')
@@ -29,7 +29,7 @@ test('SlothEntity - set the props when props are passed', () => {
   // tslint:disable-next-line:no-empty
   const constr = () => {}
 
-  const wrapper = SlothEntity('foo')(constr)
+  const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
   wrapper.call(context, { foo: 'bar' })
@@ -58,7 +58,7 @@ test('SlothEntity - set the docId only when string is passed', () => {
   // tslint:disable-next-line:no-empty
   const constr = () => {}
 
-  const wrapper = SlothEntity('foo')(constr)
+  const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
   wrapper.call(context, 'foobar')

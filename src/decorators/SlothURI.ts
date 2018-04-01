@@ -1,6 +1,8 @@
 import BaseEntity from '../models/BaseEntity'
 import getSlothData from '../utils/getSlothData'
 import { join } from 'path'
+import getDescData from '../utils/getDescData'
+import { writeFileSync } from 'fs'
 
 function readProp<T>(
   target: object,
@@ -34,8 +36,7 @@ export default function SlothURI<T>(prefix: string, ...propsKeys: (keyof T)[]) {
     }
 
     Reflect.deleteProperty(target, key)
-
-    const { uris } = getSlothData(target)
+    const { uris } = getDescData(target)
 
     uris.push({
       name: key,
@@ -44,14 +45,14 @@ export default function SlothURI<T>(prefix: string, ...propsKeys: (keyof T)[]) {
     })
 
     Reflect.defineProperty(target, key, {
-      get: () => {
-        const { slug } = getSlothData(target)
+      get: function() {
+        const { slug } = getSlothData(this)
         return join(
           prefix,
           ...propsKeys.map(propKey => {
             return slug(
               readProp(
-                target,
+                this,
                 propKey,
                 (Reflect.getOwnPropertyDescriptor(target, propKey) || {}).value
               )
@@ -59,7 +60,12 @@ export default function SlothURI<T>(prefix: string, ...propsKeys: (keyof T)[]) {
           })
         )
       },
-      set: undefined
+      set: function(val: string) {
+        if (val === '') {
+          return
+        }
+        throw new Error(`Property ${key} is not writable`)
+      }
     })
   }
 }

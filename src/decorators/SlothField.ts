@@ -2,10 +2,9 @@ import BaseEntity from '../models/BaseEntity'
 import getSlothData from '../utils/getSlothData'
 
 export default function SlothField<T>() {
-  return (target: object, key: string) => {
+  return function(this: any, target: object, key: string) {
     const desc = Reflect.getOwnPropertyDescriptor(target, key)
-    const defaultValue = desc ? desc.value : null
-
+    let defaultValue: T
     if (desc) {
       if (desc.get || desc.set) {
         throw new Error('Cannot apply SlothField on top of another decorator')
@@ -15,8 +14,8 @@ export default function SlothField<T>() {
     Reflect.deleteProperty(target, key)
 
     Reflect.defineProperty(target, key, {
-      get: (): T => {
-        const { updatedProps, props } = getSlothData(target)
+      get: function(): T {
+        const { updatedProps, props } = getSlothData(this)
         if (key in updatedProps) {
           return (updatedProps as any)[key]
         }
@@ -25,8 +24,16 @@ export default function SlothField<T>() {
         }
         return defaultValue
       },
-      set: (value: T) => {
-        Object.assign(getSlothData(target).updatedProps, { [key]: value })
+      set: function(value: T) {
+        // Typescript calls this function before class decorator
+        // Thus, when assigning default values in constructor we can get it and write it down
+        // However this should only happen once to avoid missing bugs
+        if (!('sloth' in this) && !defaultValue) {
+          defaultValue = value
+          return
+        }
+
+        Object.assign(getSlothData(this).updatedProps, { [key]: value })
       }
     })
   }

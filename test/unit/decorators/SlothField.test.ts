@@ -65,12 +65,16 @@ test('SlothField - uses props if not updated', () => {
 })
 
 test('SlothField - uses default value', () => {
-  const object = {
-    foobar: 'default',
-    sloth: { updatedProps: {}, props: {} }
+  const object: { foobar: string; sloth?: any } = {
+    foobar: ''
   }
 
   SlothField()(object, 'foobar')
+  object.foobar = 'default'
+
+  expect(() => (object.foobar = 'notsofast')).toThrowError(/SlothEntity/)
+
+  object.sloth = { updatedProps: {}, props: {} }
 
   expect(object.foobar).toBe('default')
 })
