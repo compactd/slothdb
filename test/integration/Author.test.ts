@@ -21,3 +21,14 @@ test('find author by id', async () => {
   expect(doc._id).toBe(props._id)
   expect(doc.name).toBe(props.name)
 })
+
+test('isDirty returns true with updated props', () => {
+  const grr = AuthorDatabase.create(localPouchFactory, { name: 'GRR Martin' })
+  expect(grr.name).toBe('GRR Martin')
+  expect(grr._id).toBe('authors/GRR-Martin')
+  expect(grr.isDirty()).toBe(false)
+
+  grr.name = 'grr martin'
+
+  expect(grr.isDirty()).toBe(true)
+})
