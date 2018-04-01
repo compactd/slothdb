@@ -27,7 +27,6 @@ function readProp<T>(
 export default function SlothURI<T>(prefix: string, ...propsKeys: (keyof T)[]) {
   return (target: object, key: string) => {
     const desc = Reflect.getOwnPropertyDescriptor(target, key)
-    const defaultValue = desc ? desc.value : null
 
     if (desc) {
       if (desc.get || desc.set) {

@@ -55,3 +55,47 @@ test('SlothURI - pushes to uris', () => {
     }
   ])
 })
+
+test('SlothURI - throws if on top of another decorator', () => {
+  const object = {}
+
+  Reflect.defineProperty(object, '_id', { get: () => 'foo' })
+  Reflect.defineProperty(object, 'bar', { set: () => null })
+
+  expect(() =>
+    SlothURI<{
+      foo: string
+      bar: string
+    }>('objects', 'foo', 'bar')(object, '_id')
+  ).toThrowError(/Cannot apply/)
+
+  expect(() =>
+    SlothURI<{
+      foo: string
+      bar: string
+    }>('objects', 'foo', 'bar')(object, 'bar')
+  ).toThrowError(/Cannot apply/)
+})
+
+test('SlothURI - throw when updating', () => {
+  const object = {
+    _id: '',
+    sloth: {
+      props: {},
+      updatedProps: {}
+    }
+  }
+
+  const desc = {
+    uris: []
+  }
+
+  SlothURI<{
+    foo: string
+    bar: string
+  }>('objects', 'foo', 'bar')(object, '_id')
+
+  object._id = ''
+
+  expect(() => (object._id = 'bar')).toThrow(/_id is not writable/)
+})
