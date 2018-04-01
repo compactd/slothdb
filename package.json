@@ -65,9 +65,9 @@
     "coverageThreshold": {
       "global": {
         "branches": 90,
-        "functions": 94,
-        "lines": 94,
-        "statements": 94
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
       }
     },
     "collectCoverage": true
@@ -107,8 +107,6 @@
     "validate-commit-msg": "^2.12.2"
   },
   "dependencies": {
-    "docuri": "^4.2.2",
-    "joi": "^13.1.2",
     "pouchdb": "^6.4.3",
     "slug": "^0.9.1"
   }
