@@ -12,7 +12,7 @@
   "author": "vinz243 <vinz243@gmail.com>",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/compactd/slothdb.git"
   },
   "license": "MIT",
   "engines": {
