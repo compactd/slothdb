@@ -2,7 +2,7 @@
 
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![Greenkeeper badge](https://badges.greenkeeper.io/compactd/slothdb.svg)](https://greenkeeper.io/)
-[![Travis](https://img.shields.io/travis/compactd/slothdb.svg)](https://travis-ci.org/alexjoverm/slothdb)
+[![Travis](https://img.shields.io/travis/compactd/slothdb.svg)](https://travis-ci.org/compactd/slothdb)
 [![Coveralls](https://img.shields.io/coveralls/compactd/slothdb.svg)](https://coveralls.io/github/compactd/slothdb)
 
 A typescript ORM that uses annotation and classes to describe the database
