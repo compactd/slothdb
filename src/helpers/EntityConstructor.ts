@@ -4,5 +4,5 @@ import StaticData from '../models/StaticData'
 
 export default interface EntityConstructor<S, T extends BaseEntity<S>> {
   desc?: StaticData
-  new (factory: PouchFactory, idOrProps: Partial<S> | string): T
+  new (factory: PouchFactory<S>, idOrProps: Partial<S> | string): T
 }

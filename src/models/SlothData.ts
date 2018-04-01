@@ -29,5 +29,5 @@ export default interface SlothData<S> {
    */
   slug: (str: string) => string
 
-  factory: PouchFactory
+  factory: PouchFactory<S>
 }
