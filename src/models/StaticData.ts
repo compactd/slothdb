@@ -17,5 +17,5 @@ export default interface StaticData {
   /**
    * Database name
    */
-  name: string
+  name?: string
 }

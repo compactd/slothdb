@@ -25,7 +25,7 @@ export default class SlothDatabase<
    */
   constructor(model: T) {
     this._model = model
-    if (model.desc) {
+    if (model.desc && model.desc.name) {
       this._name = model.desc.name
     } else {
       throw new Error('Please use SlothEntity')
