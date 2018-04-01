@@ -14,12 +14,16 @@ import EntityConstructor from '../helpers/EntityConstructor'
  */
 export default function SlothEntity<S extends { _id: string }>(name: string) {
   return <T extends BaseEntity<S>>(constructor: {
-    new (factory: PouchFactory, idOrProps: Partial<S> | string): T
+    new (factory: PouchFactory<S>, idOrProps: Partial<S> | string): T
   }) => {
+    const constr = (constructor as any) as { desc: StaticData }
+
+    constr.desc = { name, uris: [] }
+
     class WrappedEntity extends (constructor as EntityConstructor<any, any>) {
       sloth: SlothData<S>
 
-      constructor(factory: PouchFactory, idOrProps: Partial<S> | string) {
+      constructor(factory: PouchFactory<S>, idOrProps: Partial<S> | string) {
         super(factory, idOrProps)
         if (typeof idOrProps === 'string') {
           this.sloth = {

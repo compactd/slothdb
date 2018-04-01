@@ -28,7 +28,7 @@ export default class SlothDatabase<
     if (model.desc) {
       this._name = model.desc.name
     } else {
-      this._name = ''
+      throw new Error('Please use SlothEntity')
     }
   }
 
