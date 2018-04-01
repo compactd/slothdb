@@ -4,21 +4,6 @@ import { join } from 'path'
 import getDescData from '../utils/getDescData'
 import { writeFileSync } from 'fs'
 
-function readProp<T>(
-  target: object,
-  key: string,
-  defaultValue?: T
-): T | undefined {
-  const { updatedProps, props } = getSlothData(target)
-  if (key in updatedProps) {
-    return (updatedProps as any)[key]
-  }
-  if (key in props) {
-    return (props as any)[key]
-  }
-  return defaultValue
-}
-
 /**
  * The SlothURI decorator describes a class parameter that has no intrisic value
  * but which value depends on the other properties described as a path.
@@ -62,13 +47,7 @@ export default function SlothURI<S>(prefix: string, ...propsKeys: (keyof S)[]) {
         return join(
           prefix,
           ...propsKeys.map(propKey => {
-            return slug(
-              readProp(
-                this,
-                propKey,
-                (Reflect.getOwnPropertyDescriptor(target, propKey) || {}).value
-              )
-            )
+            return slug((this as any)[propKey])
           })
         )
       },

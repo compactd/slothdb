@@ -6,27 +6,15 @@ test('SlothURI - returns correct url', () => {
     _id: '',
     valueInProp: 'notfoobar',
     updatedValue: 'notbarbarz',
-    defaultedValue: 'ouch',
-    sloth: {
-      props: {
-        valueInProp: 'foobar',
-        updatedValue: 'notbarbarz'
-      },
-      updatedProps: {
-        updatedValue: 'barbarz'
-      },
-      slug,
-      uris: []
-    }
+    sloth: { slug }
   }
 
   SlothURI<{
     valueInProp: string
     updatedValue: string
-    defaultedValue: string
-  }>('objects', 'valueInProp', 'updatedValue', 'defaultedValue')(object, '_id')
+  }>('objects', 'valueInProp', 'updatedValue')(object, '_id')
 
-  expect(object._id).toBe('objects/foobar/barbarz/ouch')
+  expect(object._id).toBe('objects/notfoobar/notbarbarz')
 })
 
 test('SlothURI - pushes to uris', () => {
