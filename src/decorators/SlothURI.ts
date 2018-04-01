@@ -20,11 +20,24 @@ function readProp<T>(
 }
 
 /**
+ * The SlothURI decorator describes a class parameter that has no intrisic value
+ * but which value depends on the other properties described as a path.
  * 
- * @param prefix the URI root, a constant. Could be 'books' for a book entity
- * @param propsKeys key names from the props to pick
+ * The path has a root value, which is a constant and should be either the database name 
+ * pluralized, or a namespace. For example in library management system, the root could be
+ * either `library` or `books`. It is  recommended to use a namespace for relational
+ * databases and the database name for orphans.
+ * 
+ * The path components, following the root, should be slugified properties of the entity.
+ * If the path needs to include another entity identifier, as often it needs to be in relational
+ * database, then the root of the other entity id should be omitted, but path separator (/) 
+ * should NOT be escaped;, even in URLs. The path components are described using their property names.
+ * 
+ * @param prefix the URI root
+ * @param propsKeys key names to pick from the document
+ * @typeparam S the document schema
  */
-export default function SlothURI<T>(prefix: string, ...propsKeys: (keyof T)[]) {
+export default function SlothURI<S>(prefix: string, ...propsKeys: (keyof S)[]) {
   return (target: object, key: string) => {
     const desc = Reflect.getOwnPropertyDescriptor(target, key)
 
