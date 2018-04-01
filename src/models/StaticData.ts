@@ -14,4 +14,8 @@ export default interface StaticData {
     prefix: string
     propsKeys: string[]
   }[]
+  /**
+   * Database name
+   */
+  name: string
 }

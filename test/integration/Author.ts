@@ -1,7 +1,9 @@
 import BaseEntity from '../../src/models/BaseEntity'
+import SlothDatabase from '../../src/models/SlothDatabase'
 import SlothEntity from '../../src/decorators/SlothEntity'
 import SlothURI from '../../src/decorators/SlothURI'
 import SlothField from '../../src/decorators/SlothField'
+import localPouchFactory from '../../src/utils/localPouchFactory'
 
 export interface AuthorSchema {
   _id: string
@@ -9,9 +11,11 @@ export interface AuthorSchema {
 }
 
 @SlothEntity('authors')
-export default class Author extends BaseEntity<AuthorSchema> {
+class Author extends BaseEntity<AuthorSchema> {
   @SlothField() name: string = ''
 
   @SlothURI('authors', 'name')
   _id: string = ''
 }
+
+export default new SlothDatabase<AuthorSchema, Author, typeof Author>(Author)

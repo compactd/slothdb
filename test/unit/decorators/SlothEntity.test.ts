@@ -1,4 +1,5 @@
 import SlothEntity from '../../../src/decorators/SlothEntity'
+import localPouchFactory from '../../../src/utils/localPouchFactory'
 
 test('SlothEntity - attaches a sloth object to class', () => {
   // tslint:disable-next-line:no-empty
@@ -7,7 +8,7 @@ test('SlothEntity - attaches a sloth object to class', () => {
   const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
-  wrapper.call(context, 'foos/foo')
+  wrapper.call(context, localPouchFactory, 'foos/foo')
 
   expect(context.sloth).toBeDefined()
 })
@@ -19,7 +20,7 @@ test('SlothEntity - set the name using the passed argument', () => {
   const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
-  wrapper.call(context, 'foos/foo')
+  wrapper.call(context, localPouchFactory, 'foos/foo')
 
   expect(context.sloth).toBeDefined()
   expect(context.sloth.name).toBe('foo')
@@ -32,7 +33,7 @@ test('SlothEntity - set the props when props are passed', () => {
   const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
-  wrapper.call(context, { foo: 'bar' })
+  wrapper.call(context, localPouchFactory, { foo: 'bar' })
 
   expect(context.sloth).toBeDefined()
   expect(context.sloth.name).toBe('foo')
@@ -43,10 +44,10 @@ test('SlothEntity - eventually set docId when props are passed with _id', () => 
   // tslint:disable-next-line:no-empty
   const constr = () => {}
 
-  const wrapper = SlothEntity('foo')(constr)
+  const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
-  wrapper.call(context, { _id: 'foobar', foo: 'bar' })
+  wrapper.call(context, localPouchFactory, { _id: 'foobar', foo: 'bar' })
 
   expect(context.sloth).toBeDefined()
   expect(context.sloth.name).toBe('foo')
@@ -61,7 +62,7 @@ test('SlothEntity - set the docId only when string is passed', () => {
   const wrapper = SlothEntity('foo')(constr as any)
   const context: any = {}
 
-  wrapper.call(context, 'foobar')
+  wrapper.call(context, localPouchFactory, 'foobar')
 
   expect(context.sloth).toBeDefined()
   expect(context.sloth.name).toBe('foo')

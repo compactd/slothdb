@@ -1,3 +1,5 @@
+import PouchFactory from './PouchFactory'
+
 /**
  * Represents the inherent sloth data for each entity
  * It is available via this
@@ -26,4 +28,6 @@ export default interface SlothData<S> {
    * A slug function that slugifies a string, should move this
    */
   slug: (str: string) => string
+
+  factory: PouchFactory
 }

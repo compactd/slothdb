@@ -108,6 +108,7 @@
   },
   "dependencies": {
     "pouchdb": "^6.4.3",
+    "pouchdb-adapter-memory": "^6.4.3",
     "slug": "^0.9.1"
   }
 }
