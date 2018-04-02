@@ -1,5 +1,5 @@
 import SlothEntity from '../../../src/decorators/SlothEntity'
-import localPouchFactory from '../../../src/utils/localPouchFactory'
+import localPouchFactory from '../../utils/localPouchFactory'
 
 test('SlothEntity - attaches a sloth object to class', () => {
   // tslint:disable-next-line:no-empty

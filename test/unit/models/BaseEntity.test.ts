@@ -104,6 +104,7 @@ test('BaseEntity#save remove previous doc', async () => {
   expect(remove).toHaveBeenCalledWith('foobar')
   expect(_rev).toBe('myrev')
 })
+
 test('BaseEntity#save throws error if not not_found', async () => {
   const isDirty = jest.fn().mockReturnValue(true)
 
@@ -134,4 +135,26 @@ test('BaseEntity#save throws error if not not_found', async () => {
   expect(get).toHaveBeenCalledWith('foos/bar')
 
   expect(put).toHaveBeenCalledTimes(0)
+})
+
+test('BaseEntity#remove returns false if document has no docId', async () => {
+  const flag = await BaseEntity.prototype.remove.call({ sloth: {} })
+  expect(flag).toBe(false)
+})
+
+test('BaseEntity#remove calls db.remove with _rev', async () => {
+  const get = jest.fn().mockResolvedValue({ _rev: 'revision' })
+  const remove = jest.fn().mockResolvedValue(null)
+
+  const factory = jest.fn().mockReturnValue({ get, remove })
+
+  const flag = await BaseEntity.prototype.remove.call({
+    sloth: { factory, docId: 'foobar', name: 'foos' }
+  })
+
+  expect(flag).toBe(true)
+
+  expect(factory).toHaveBeenCalledWith('foos')
+  expect(get).toHaveBeenCalledWith('foobar')
+  expect(remove).toHaveBeenCalledWith('foobar', 'revision')
 })

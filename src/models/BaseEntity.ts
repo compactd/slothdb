@@ -80,4 +80,25 @@ export default class BaseEntity<S> {
       throw err
     }
   }
+  /**
+   * Remove a document from the database
+   * @returns a Promise that resolves into a boolean, true if document was removed,
+   *          false if the document doesn't have a docId in its slothdata
+   */
+  async remove() {
+    const { docId, factory, name } = getSlothData(this)
+
+    if (!docId) {
+      return false
+    }
+
+    const db = factory(name)
+    const { _rev } = await db.get(docId)
+
+    await db.remove(docId, _rev)
+
+    getSlothData(this).docId = undefined
+
+    return true
+  }
 }

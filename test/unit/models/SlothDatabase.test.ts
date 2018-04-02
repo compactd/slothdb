@@ -1,5 +1,5 @@
 import SlothDatabase from '../../../src/models/SlothDatabase'
-import localPouchFactory from '../../../src/utils/localPouchFactory'
+import localPouchFactory from '../../utils/localPouchFactory'
 
 test('SlothDatabase#constructor - sets the db name from desc', () => {
   const db1 = new SlothDatabase({ desc: { name: 'foos' } } as any)
