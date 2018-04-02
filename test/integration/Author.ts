@@ -8,6 +8,7 @@ import localPouchFactory from '../../src/utils/localPouchFactory'
 export interface AuthorSchema {
   _id: string
   name: string
+  age: number
 }
 
 @SlothEntity('authors')
@@ -16,6 +17,8 @@ class Author extends BaseEntity<AuthorSchema> {
 
   @SlothURI('authors', 'name')
   _id: string = ''
+
+  @SlothField() age = 40
 }
 
 export default new SlothDatabase<AuthorSchema, Author, typeof Author>(Author)
