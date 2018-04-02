@@ -1,6 +1,8 @@
 import PouchFactory from './PouchFactory'
 import BaseEntity from './BaseEntity'
 import EntityConstructor from '../helpers/EntityConstructor'
+import getProtoData from '../utils/getProtoData'
+import { join } from 'path'
 
 /**
  * This represent a Database
@@ -9,13 +11,22 @@ import EntityConstructor from '../helpers/EntityConstructor'
  * @typeparam E the Entity
  * @typeparam T the entity constructor
  */
-export default class SlothDatabase<
-  S,
-  E extends BaseEntity<S>,
-  T extends EntityConstructor<S, E>
-> {
-  private _name: string
-  private _model: T
+export default class SlothDatabase<S, E extends BaseEntity<S>> {
+  /**
+   * 
+   * @private
+   * @type {string}
+   * @memberof SlothDatabase
+   */
+  _name: string
+  /**
+   * 
+   * 
+   * @type {T}
+   * @memberof SlothDatabase
+   * @private
+   */
+  _model: EntityConstructor<S, E>
 
   /**
    * Create a new database instance
@@ -32,6 +43,33 @@ export default class SlothDatabase<
     }
   }
 
+  /**
+   * Fetches all documents for this database and map them with the model
+   * 
+   * @param {PouchFactory<S>} factory the PouchDB factory to use 
+   * @param {string} [startKey=''] the startkey to use
+   * @param {string} [endKey=path.join(startKey, '\uffff')] the endkey to use
+   * @returns a promise that resolves into an array of entity instances
+   * @see PouchDB#allDocs
+   * @memberof SlothDatabase
+   */
+  findAllDocs(
+    factory: PouchFactory<S>,
+    startKey = '',
+    endKey = join(startKey, '\uffff')
+  ) {
+    const db = factory(this._name)
+
+    return db
+      .allDocs({
+        include_docs: true,
+        startkey: startKey,
+        endkey: endKey
+      })
+      .then(({ rows }) => {
+        return rows.map(({ doc }) => this.create(factory, doc as S))
+      })
+  }
   /**
    * Fetch a docuemt from the database
    * @param factory the PouchDB factory to use

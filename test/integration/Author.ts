@@ -21,4 +21,4 @@ class Author extends BaseEntity<AuthorSchema> {
   @SlothField() age = 40
 }
 
-export default new SlothDatabase<AuthorSchema, Author, typeof Author>(Author)
+export default new SlothDatabase<AuthorSchema, Author>(Author)
