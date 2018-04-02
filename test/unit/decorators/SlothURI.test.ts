@@ -26,22 +26,26 @@ test('SlothURI - pushes to uris', () => {
     }
   }
 
-  const desc = {
-    uris: []
+  // tslint:disable-next-line:variable-name
+  const __protoData = {
+    uris: [],
+    fields: []
   }
 
   SlothURI<{
     foo: string
     bar: string
-  }>('objects', 'foo', 'bar')({ desc }, '_id')
+  }>('objects', 'foo', 'bar')({ __protoData }, '_id')
 
-  expect(desc.uris).toEqual([
+  expect(__protoData.uris).toEqual([
     {
       name: '_id',
       prefix: 'objects',
       propsKeys: ['foo', 'bar']
     }
   ])
+
+  expect(__protoData.fields).toEqual([{ key: '_id' }])
 })
 
 test('SlothURI - throws if on top of another decorator', () => {

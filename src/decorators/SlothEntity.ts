@@ -18,7 +18,7 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
   }) => {
     const constr = (constructor as any) as { desc: StaticData }
 
-    constr.desc = { name, uris: [] }
+    constr.desc = { name }
 
     class WrappedEntity extends (constructor as EntityConstructor<any, any>) {
       sloth: SlothData<S>

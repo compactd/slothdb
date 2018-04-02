@@ -1,5 +1,6 @@
 import BaseEntity from '../models/BaseEntity'
 import getSlothData from '../utils/getSlothData'
+import getProtoData from '../utils/getProtoData'
 
 /**
  * SlothField decorator is used to mark a specific class property
@@ -14,11 +15,16 @@ export default function SlothField<T>() {
   return function(this: any, target: object, key: string) {
     const desc = Reflect.getOwnPropertyDescriptor(target, key)
     let defaultValue: T
+
     if (desc) {
       if (desc.get || desc.set) {
         throw new Error('Cannot apply SlothField on top of another decorator')
       }
     }
+
+    const data = getProtoData(target)
+
+    data.fields.push({ key })
 
     Reflect.deleteProperty(target, key)
 
@@ -37,7 +43,7 @@ export default function SlothField<T>() {
         // Typescript calls this function before class decorator
         // Thus, when assigning default values in constructor we can get it and write it down
         // However this should only happen once to avoid missing bugs
-        if (!('sloth' in this) && !defaultValue) {
+        if (!('sloth' in this) && (!defaultValue || defaultValue === value)) {
           defaultValue = value
           return
         }

@@ -6,15 +6,6 @@
  */
 export default interface StaticData {
   /**
-   * A list of doc URIs
-   * @see [[SlothURI]]
-   */
-  uris: {
-    name: string
-    prefix: string
-    propsKeys: string[]
-  }[]
-  /**
    * Database name
    */
   name?: string

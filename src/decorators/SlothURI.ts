@@ -1,8 +1,8 @@
 import BaseEntity from '../models/BaseEntity'
 import getSlothData from '../utils/getSlothData'
 import { join } from 'path'
-import getDescData from '../utils/getDescData'
 import { writeFileSync } from 'fs'
+import getProtoData from '../utils/getProtoData'
 
 /**
  * The SlothURI decorator describes a class parameter that has no intrisic value
@@ -33,13 +33,15 @@ export default function SlothURI<S>(prefix: string, ...propsKeys: (keyof S)[]) {
     }
 
     Reflect.deleteProperty(target, key)
-    const { uris } = getDescData(target)
+    const { uris, fields } = getProtoData(target)
 
     uris.push({
       name: key,
       prefix,
       propsKeys
     })
+
+    fields.push({ key })
 
     Reflect.defineProperty(target, key, {
       get: function() {
