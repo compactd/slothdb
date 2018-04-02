@@ -1,5 +1,5 @@
 import AuthorDatabase from './Author'
-import localPouchFactory from '../../src/utils/localPouchFactory'
+import localPouchFactory from '../utils/localPouchFactory'
 import PouchDB from 'pouchdb'
 
 test('creates a new author from props with valid props', () => {
