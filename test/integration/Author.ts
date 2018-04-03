@@ -1,8 +1,11 @@
-import BaseEntity from '../../src/models/BaseEntity'
-import SlothDatabase from '../../src/models/SlothDatabase'
-import SlothEntity from '../../src/decorators/SlothEntity'
-import SlothURI from '../../src/decorators/SlothURI'
-import SlothField from '../../src/decorators/SlothField'
+import {
+  BaseEntity,
+  SlothDatabase,
+  SlothEntity,
+  SlothURI,
+  SlothField,
+  SlothRel
+} from '../../src/slothdb'
 
 export interface AuthorSchema {
   _id: string

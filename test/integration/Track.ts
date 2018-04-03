@@ -1,10 +1,14 @@
-import SlothEntity from '../../src/decorators/SlothEntity'
-import BaseEntity from '../../src/models/BaseEntity'
-import SlothField from '../../src/decorators/SlothField'
-import SlothRel from '../../src/decorators/SlothRel'
-import { belongsToMapper } from '../../src/utils/relationMappers'
-import SlothDatabase from '../../src/models/SlothDatabase'
-import SlothURI from '../../src/decorators/SlothURI'
+import {
+  BaseEntity,
+  SlothDatabase,
+  SlothEntity,
+  SlothURI,
+  SlothField,
+  SlothRel,
+  belongsToMapper
+} from '../../src/slothdb'
+import Artist from './Artist'
+import Album from './Album'
 
 export interface TrackSchema {
   _id: string
