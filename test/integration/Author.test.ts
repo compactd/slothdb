@@ -2,6 +2,8 @@ import AuthorDatabase from './Author'
 import localPouchFactory from '../utils/localPouchFactory'
 import PouchDB from 'pouchdb'
 
+PouchDB.plugin(require('pouchdb-adapter-memory'))
+
 test('creates a new author from props with valid props', () => {
   const grr = AuthorDatabase.create(localPouchFactory, { name: 'GRR Martin' })
   expect(grr.name).toBe('GRR Martin')

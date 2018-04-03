@@ -175,3 +175,53 @@ test('SlothDatabase#findAllIDs - calls allDocs and return ids', async () => {
     ]
   ])
 })
+
+describe('SlothDatabase#subscribe', () => {
+  test('')
+})
+
+describe('SlothDatabase#changes', () => {
+  const proto = Object.assign({}, SlothDatabase.prototype, { _subscribers: [] })
+
+  const cancel = jest.fn()
+  const on = jest.fn().mockReturnValue({ cancel })
+  const changes = jest.fn().mockReturnValue({ on })
+
+  const factory1 = () => ({ changes })
+  const factory2 = () => ({ changes })
+
+  const sub1 = () => ({})
+  const sub2 = () => ({})
+
+  test(`Pushes sub and start listening`, () => {
+    SlothDatabase.prototype.subscribe.call(proto, factory1, sub1)
+
+    expect(on).toHaveBeenCalledTimes(1)
+    expect(changes).toHaveBeenCalledTimes(1)
+    expect(cancel).not.toHaveBeenCalled()
+  })
+
+  test(`Pushes sub and doesn't listen if already`, () => {
+    SlothDatabase.prototype.subscribe.call(proto, factory1, sub2)
+
+    expect(on).toHaveBeenCalledTimes(1)
+    expect(changes).toHaveBeenCalledTimes(1)
+    expect(cancel).not.toHaveBeenCalled()
+  })
+
+  test(`Doesn't call changes.cancel with remaining subs`, () => {
+    SlothDatabase.prototype.cancel.call(proto, factory1, sub2)
+
+    expect(on).toHaveBeenCalledTimes(1)
+    expect(changes).toHaveBeenCalledTimes(1)
+    expect(cancel).not.toHaveBeenCalled()
+  })
+
+  test(`Call changes.cancel without remaining subs`, () => {
+    SlothDatabase.prototype.cancel.call(proto, factory1, sub2)
+
+    expect(on).toHaveBeenCalledTimes(1)
+    expect(changes).toHaveBeenCalledTimes(1)
+    expect(cancel).toHaveBeenCalled()
+  })
+})

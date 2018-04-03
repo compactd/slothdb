@@ -1,5 +1,6 @@
 import PouchFactory from './PouchFactory'
 import BaseEntity from './BaseEntity'
+import { Subscriber, ChangeAction, ActionType } from './changes'
 import EntityConstructor from '../helpers/EntityConstructor'
 import getProtoData from '../utils/getProtoData'
 import { join } from 'path'
@@ -28,6 +29,12 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
    * @private
    */
   _model: EntityConstructor<S, E>
+
+  private _subscribers: {
+    factory: any
+    sub: Subscriber<S>
+    changes: PouchDB.Core.Changes<S>
+  }[] = []
 
   /**
    * Create a new database instance
@@ -132,5 +139,77 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
    */
   create(factory: PouchFactory<S>, props: Partial<S>) {
     return new this._model(factory, props)
+  }
+
+  /**
+   * Subscribes a function to PouchDB changes, so that
+   * the function will be called when changes are made
+   * 
+   * @param factory the PouchDB factory
+   * @param sub the subscriber function
+   * @see [[Subscriber]]
+   * @see [[ChangeAction]]
+   */
+  subscribe(factory: PouchFactory<S>, sub: Subscriber<S>) {
+    if (!this.getSubscriberFor(factory)) {
+      const changes = factory(this._name)
+        .changes({
+          since: 'now',
+          live: true,
+          include_docs: true
+        })
+        .on('change', ({ deleted, doc, id }) => {
+          if (deleted || !doc) {
+            return this.dispatch({
+              type: ActionType.REMOVED,
+              payload: { [this._name]: id },
+              meta: {}
+            })
+          }
+          if (doc._rev.match(/^1-/)) {
+            return this.dispatch({
+              type: ActionType.ADDED,
+              payload: { [this._name]: doc },
+              meta: { revision: doc._rev }
+            })
+          }
+          return this.dispatch({
+            type: ActionType.CHANGED,
+            payload: { [this._name]: doc },
+            meta: { revision: doc._rev }
+          })
+        })
+      this._subscribers.push({ factory, sub, changes })
+      return
+    }
+    const { changes } = this.getSubscriberFor(factory)!
+    this._subscribers.push({ factory, sub, changes })
+  }
+
+  /**
+   * Unsubscribe a subscriber, so it will not be called anymore
+   * Possibly cancel PouchDB changes
+   * 
+   * @param factory The pouchDB factory to unsubscribe from
+   * @param sub the subscriber to unsubscribe
+   */
+  cancel(factory: PouchFactory<S>, sub: Subscriber<S>) {
+    const index = this._subscribers.findIndex(
+      el => el.factory === factory && el.sub === sub
+    )
+
+    const [{ changes }] = this._subscribers.splice(index, 1)
+
+    if (!this.getSubscriberFor(factory)) {
+      changes.cancel()
+    }
+  }
+
+  protected getSubscriberFor(factory: PouchFactory<S>) {
+    return this._subscribers.find(el => el.factory === factory)
+  }
+
+  protected dispatch(action: ChangeAction<S>) {
+    this._subscribers.forEach(({ sub }) => sub(action))
   }
 }
