@@ -3,6 +3,7 @@ import commonjs from 'rollup-plugin-commonjs'
 import sourceMaps from 'rollup-plugin-sourcemaps'
 import camelCase from 'lodash.camelcase'
 import typescript from 'rollup-plugin-typescript2'
+import builtins from 'rollup-plugin-node-builtins'
 
 const pkg = require('./package.json')
 
@@ -32,5 +33,6 @@ export default {
 
     // Resolve source maps to the original source
     sourceMaps(),
+    builtins()
   ],
 }
