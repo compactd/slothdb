@@ -6,6 +6,7 @@ import SlothField from '../../src/decorators/SlothField'
 import SlothRel from '../../src/decorators/SlothRel'
 import { belongsToMapper } from '../../src/utils/relationMappers'
 import Artist from './Artist'
+import Track from './Track'
 
 export interface AlbumSchema {
   _id: string
@@ -21,6 +22,8 @@ class Album extends BaseEntity<AlbumSchema> {
 
   @SlothURI('library', 'artist', 'name')
   _id: string = ''
+
+  tracks: () => Track
 
   rels = {
     artist: belongsToMapper<Artist>(this, 'artist')

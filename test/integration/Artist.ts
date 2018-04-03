@@ -5,6 +5,7 @@ import SlothURI from '../../src/decorators/SlothURI'
 import SlothField from '../../src/decorators/SlothField'
 import Album from './Album'
 import SlothRel from '../../src/decorators/SlothRel'
+import Track from './Track'
 
 export interface ArtistSchema {
   _id: string
@@ -21,6 +22,9 @@ class Artist extends BaseEntity<ArtistSchema> {
 
   @SlothRel({ hasMany: () => Album })
   albums: () => Album
+
+  @SlothRel({ hasMany: () => Track })
+  tracks: () => Track
 }
 
 export default new SlothDatabase<ArtistSchema, Artist>(Artist)
