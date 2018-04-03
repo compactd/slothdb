@@ -13,7 +13,7 @@ export interface AlbumSchema {
   artist: string
 }
 
-@SlothEntity('artists')
+@SlothEntity('albums')
 class Album extends BaseEntity<AlbumSchema> {
   @SlothField() name: string = ''
   @SlothRel({ belongsTo: () => Artist, cascade: true })

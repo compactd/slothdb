@@ -37,7 +37,7 @@ export type HasManyDescriptor = {
    * Specifies that whenever removing the parent entity, the children
    * should get removed as well
    * 
-   * 
+   * Defaults to true, and recommend keeping it this  way
    * @type {boolean}
    */
   cascade?: boolean

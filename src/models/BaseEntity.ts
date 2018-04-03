@@ -161,16 +161,24 @@ export default class BaseEntity<S> {
         endkey: join(relId, '/\uffff')
       })
       if (children.rows.length === 0) {
-        const parent = await this.getRelationEntity(rel.key as any)
+        try {
+          const parent = await this.getRelationEntity(rel.key as any)
 
-        await parent.remove()
+          await parent.remove()
+        } catch (err) {
+          if (err.message === 'missing') {
+            return
+          }
+          throw err
+        }
       }
     }
 
-    if ('hasMany' in rel && rel.cascade) {
-      // TODO
+    if ('hasMany' in rel && rel.cascade !== false) {
+      const db = rel.hasMany().withRoot(this._id)
+      const children = await db.findAllDocs(factory)
 
-      throw new Error('hasMany not implemented yet')
+      await Promise.all(children.map(child => child.remove()))
     }
   }
 }

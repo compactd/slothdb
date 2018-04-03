@@ -10,6 +10,7 @@ import SlothDatabase from '../models/SlothDatabase'
  * corresponds to another entity identifier. The possible relations are:
  * 
  *   - belongsTo: one or several entities belongs to a parent entity
+ *   - hasMany: one entity has several other entities; the relation is stored the _id
  * 
  * @see [[RelationDescriptor]]
  * @param rel the relation description
@@ -17,14 +18,6 @@ import SlothDatabase from '../models/SlothDatabase'
 export default function SlothRel(rel: RelationDescriptor) {
   return function(this: any, target: object, key: string) {
     const desc = Reflect.getOwnPropertyDescriptor(target, key)
-
-    function readProp(this: any, target: any = this) {
-      const { updatedProps, props } = getSlothData(target)
-      if (key in updatedProps) {
-        return (updatedProps as any)[key]
-      }
-      return (props as any)[key]
-    }
 
     if (desc) {
       if (desc.get || desc.set) {
@@ -37,18 +30,19 @@ export default function SlothRel(rel: RelationDescriptor) {
     fields.push({ key })
     rels.push({ ...rel, key })
 
-    if ('belongsTo' in rel) {
-      const { name } = getProtoData(rel.belongsTo()._model.prototype)
-
-      if (!name) {
-        throw new Error(`Name is undefined or empty`)
-      }
-    }
-
     Reflect.deleteProperty(target, key)
 
     Reflect.defineProperty(target, key, {
-      get: readProp,
+      get: function(this: any, target: any = this) {
+        if ('hasMany' in rel) {
+          return () => rel.hasMany().withRoot(this._id)
+        }
+        const { updatedProps, props } = getSlothData(target)
+        if (key in updatedProps) {
+          return (updatedProps as any)[key]
+        }
+        return (props as any)[key]
+      },
       set: function(value: string) {
         // Typescript calls this function before class decorator
         // Thus, when assigning default values in constructor we can get it and write it down

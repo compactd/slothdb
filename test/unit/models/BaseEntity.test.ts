@@ -303,30 +303,3 @@ test('BaseEntity#removeRelations remove parent if no child', async () => {
   expect(remove).toHaveBeenCalled()
   expect(belongsTo).toHaveBeenCalled()
 })
-
-test('BaseEntity#removeRelations remove parent if no child', async () => {
-  const allDocs = jest.fn().mockResolvedValue({ rows: [] })
-  const factory = jest.fn().mockReturnValue({ allDocs })
-
-  const name = 'foobars'
-
-  const rels = [
-    {
-      hasMany: {},
-      cascade: true,
-      key: 'foo'
-    }
-  ]
-
-  await expect(
-    BaseEntity.prototype.removeRelations.apply({
-      ...BaseEntity.prototype,
-      __protoData: { rels },
-      foo: 'bar',
-      sloth: {
-        factory,
-        name
-      }
-    })
-  ).rejects.toMatchObject({ message: 'hasMany not implemented yet' })
-})

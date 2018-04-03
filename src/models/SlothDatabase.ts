@@ -12,6 +12,7 @@ import { join } from 'path'
  * @typeparam T the entity constructor
  */
 export default class SlothDatabase<S, E extends BaseEntity<S>> {
+  _root: string
   /**
    * 
    * @private
@@ -33,14 +34,25 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
    * @param factory the pouch factory to use
    * @param name the database name
    * @param model the model constructor
+   * @param root the root name, which is the startKey. I don't recommend it
    */
-  constructor(model: EntityConstructor<S, E>) {
+  constructor(model: EntityConstructor<S, E>, root: string = '') {
     this._model = model
+    this._root = root
     if (model.desc && model.desc.name) {
       this._name = model.desc.name
     } else {
       throw new Error('Please use SlothEntity')
     }
+  }
+
+  /**
+   * Returns a database that will only find entities with _id
+   * starting with the root path
+   * @param root the root path
+   */
+  withRoot(root: string) {
+    return new SlothDatabase<S, E>(this._model, join(this._root, root))
   }
 
   /**
@@ -55,7 +67,7 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
    */
   findAllIDs(
     factory: PouchFactory<S>,
-    startKey = '',
+    startKey = this._root || '',
     endKey = join(startKey, '\uffff')
   ) {
     const db = factory(this._name)
@@ -83,7 +95,7 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
    */
   findAllDocs(
     factory: PouchFactory<S>,
-    startKey = '',
+    startKey = this._root || '',
     endKey = join(startKey, '\uffff')
   ) {
     const db = factory(this._name)

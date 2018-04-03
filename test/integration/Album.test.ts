@@ -1,8 +1,8 @@
 import PouchDB from 'pouchdb'
 import Artist from './Artist'
 import Album from './Album'
+
 import { transpileModule } from 'typescript'
-import { readFileSync } from 'fs'
 const { compilerOptions } = require('../../tsconfig.json')
 
 PouchDB.plugin(require('pouchdb-adapter-memory'))
