@@ -52,6 +52,8 @@ test('SlothDatabase#create - create a model instance with props', async () => {
 })
 
 test('SlothDatabase#findAllDocs - calls allDocs and creates models', async () => {
+  const create = jest.fn().mockImplementation((omit: never, el: object) => el)
+
   const props = { _id: 'foos/bar', foo: 'bar' }
   const docs = [{ foo: 'bar' }, { bar: 'foo' }]
 
@@ -61,18 +63,21 @@ test('SlothDatabase#findAllDocs - calls allDocs and creates models', async () =>
   const factory = jest.fn().mockReturnValue({ allDocs })
 
   expect(
-    await SlothDatabase.prototype.findAllDocs.call({ _name: 'foos' }, factory)
+    await SlothDatabase.prototype.findAllDocs.call(
+      { create, _name: 'foos' },
+      factory
+    )
   ).toEqual(docs)
   expect(
     await SlothDatabase.prototype.findAllDocs.call(
-      { _name: 'foos' },
+      { create, _name: 'foos' },
       factory,
       'foos/bar'
     )
   ).toEqual(docs)
   expect(
     await SlothDatabase.prototype.findAllDocs.call(
-      { _name: 'foos' },
+      { create, _name: 'foos' },
       factory,
       'foo',
       'bar'
@@ -112,29 +117,30 @@ test('SlothDatabase#findAllDocs - calls allDocs and creates models', async () =>
   ])
 })
 
-test('SlothDatabase#findAllID - calls allDocs and return ids', async () => {
+test('SlothDatabase#findAllIDs - calls allDocs and return ids', async () => {
+  const create = jest.fn().mockImplementation((omit: never, el: object) => el)
+
   const rows = ['foo', 'bar']
 
-  const allDocs = jest.fn().mockResolvedValue({ rows })
+  const allDocs = jest
+    .fn()
+    .mockResolvedValue({ rows: rows.map(id => ({ id })) })
 
   const factory = jest.fn().mockReturnValue({ allDocs })
 
   expect(
-    await SlothDatabase.prototype.findAllDocs.call(
-      { create, _name: 'foos' },
-      factory
-    )
+    await SlothDatabase.prototype.findAllIDs.call({ _name: 'foos' }, factory)
   ).toEqual(rows)
   expect(
-    await SlothDatabase.prototype.findAllDocs.call(
-      { create, _name: 'foos' },
+    await SlothDatabase.prototype.findAllIDs.call(
+      { _name: 'foos' },
       factory,
       'foos/bar'
     )
   ).toEqual(rows)
   expect(
-    await SlothDatabase.prototype.findAllDocs.call(
-      { create, _name: 'foos' },
+    await SlothDatabase.prototype.findAllIDs.call(
+      { _name: 'foos' },
       factory,
       'foo',
       'bar'

@@ -145,15 +145,17 @@ test('BaseEntity#remove returns false if document has no docId', async () => {
 test('BaseEntity#remove calls db.remove with _rev', async () => {
   const get = jest.fn().mockResolvedValue({ _rev: 'revision' })
   const remove = jest.fn().mockResolvedValue(null)
+  const removeRelations = jest.fn()
 
   const factory = jest.fn().mockReturnValue({ get, remove })
 
   const flag = await BaseEntity.prototype.remove.call({
-    sloth: { factory, docId: 'foobar', name: 'foos' }
+    sloth: { factory, docId: 'foobar', name: 'foos' },
+    removeRelations
   })
 
   expect(flag).toBe(true)
-
+  expect(removeRelations).toHaveBeenCalled()
   expect(factory).toHaveBeenCalledWith('foos')
   expect(get).toHaveBeenCalledWith('foobar')
   expect(remove).toHaveBeenCalledWith('foobar', 'revision')

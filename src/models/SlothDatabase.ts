@@ -34,7 +34,7 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
    * @param name the database name
    * @param model the model constructor
    */
-  constructor(model: T) {
+  constructor(model: EntityConstructor<S, E>) {
     this._model = model
     if (model.desc && model.desc.name) {
       this._name = model.desc.name
