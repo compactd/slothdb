@@ -1,8 +1,15 @@
 import PouchDB from 'pouchdb'
 import Artist from './Artist'
 import Album from './Album'
+import { transpileModule } from 'typescript'
+import { readFileSync } from 'fs'
+const { compilerOptions } = require('../../tsconfig.json')
 
 PouchDB.plugin(require('pouchdb-adapter-memory'))
+
+test('typescript transpiles', () => {
+  transpileModule('./Album.ts', { compilerOptions })
+})
 
 test('generate uri', async () => {
   const dbName = Date.now().toString(26)
@@ -131,4 +138,25 @@ test('doesnt remove parent if still has children', async () => {
   await expect(
     db.get('library/Flatbush-Zombies/BetterOffDead')
   ).rejects.toMatchObject({ message: 'missing' })
+})
+
+test('rels.artist - maps with artist', async () => {
+  const dbName = Date.now().toString(26)
+  const db = new PouchDB(dbName, { adapter: 'memory' })
+
+  const factory = () => new PouchDB(dbName, { adapter: 'memory' })
+
+  const flatbushZombies = Artist.create(factory, { name: 'Flatbush Zombies' })
+
+  await flatbushZombies.save()
+
+  const betterOffDead = Album.create(factory, {
+    name: 'BetterOffDead',
+    artist: flatbushZombies._id
+  })
+
+  const flatbush = await betterOffDead.rels.artist(factory)
+
+  expect(flatbush._id).toBe('library/Flatbush-Zombies')
+  expect(flatbush.name).toBe('Flatbush Zombies')
 })

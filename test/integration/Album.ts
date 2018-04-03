@@ -4,6 +4,7 @@ import SlothEntity from '../../src/decorators/SlothEntity'
 import SlothURI from '../../src/decorators/SlothURI'
 import SlothField from '../../src/decorators/SlothField'
 import SlothRel from '../../src/decorators/SlothRel'
+import { belongsToMapper } from '../../src/utils/relationMappers'
 import Artist from './Artist'
 
 export interface AlbumSchema {
@@ -20,6 +21,10 @@ class Album extends BaseEntity<AlbumSchema> {
 
   @SlothURI('library', 'artist', 'name')
   _id: string = ''
+
+  rels = {
+    artist: belongsToMapper<Artist>(this, 'artist')
+  }
 }
 
 export default new SlothDatabase<AlbumSchema, Album>(Album)
