@@ -1,3 +1,6 @@
+import { RelationDescriptor } from './relationDescriptors'
+import SlothDatabase from './SlothDatabase'
+
 /**
  * This object is available for every instance
  * 
@@ -23,4 +26,6 @@ export default interface ProtoData {
   fields: {
     key: string
   }[]
+
+  rels: (RelationDescriptor & { key: string })[]
 }

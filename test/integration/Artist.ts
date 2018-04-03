@@ -4,20 +4,18 @@ import SlothEntity from '../../src/decorators/SlothEntity'
 import SlothURI from '../../src/decorators/SlothURI'
 import SlothField from '../../src/decorators/SlothField'
 
-export interface AuthorSchema {
+export interface ArtistSchema {
   _id: string
   name: string
   age: number
 }
 
 @SlothEntity('authors')
-class Author extends BaseEntity<AuthorSchema> {
+class Artist extends BaseEntity<ArtistSchema> {
   @SlothField() name: string = ''
 
-  @SlothURI('authors', 'name')
+  @SlothURI('library', 'name')
   _id: string = ''
-
-  @SlothField() age = 40
 }
 
-export default new SlothDatabase<AuthorSchema, Author>(Author)
+export default new SlothDatabase<ArtistSchema, Artist>(Artist)

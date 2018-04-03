@@ -22,7 +22,7 @@ export default function SlothField<T>() {
       }
     }
 
-    const data = getProtoData(target)
+    const data = getProtoData(target, true)
 
     data.fields.push({ key })
 

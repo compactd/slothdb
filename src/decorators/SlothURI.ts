@@ -1,7 +1,6 @@
 import BaseEntity from '../models/BaseEntity'
 import getSlothData from '../utils/getSlothData'
 import { join } from 'path'
-import { writeFileSync } from 'fs'
 import getProtoData from '../utils/getProtoData'
 
 /**
@@ -33,7 +32,7 @@ export default function SlothURI<S>(prefix: string, ...propsKeys: (keyof S)[]) {
     }
 
     Reflect.deleteProperty(target, key)
-    const { uris, fields } = getProtoData(target)
+    const { uris, fields } = getProtoData(target, true)
 
     uris.push({
       name: key,
@@ -46,10 +45,32 @@ export default function SlothURI<S>(prefix: string, ...propsKeys: (keyof S)[]) {
     Reflect.defineProperty(target, key, {
       get: function() {
         const { slug } = getSlothData(this)
+
         return join(
           prefix,
           ...propsKeys.map(propKey => {
-            return slug((this as any)[propKey])
+            const value = (this as any)[propKey]
+
+            if (!value) {
+              throw new Error(
+                `Key ${propKey} has no value, but is required for the ${key} URI`
+              )
+            }
+
+            const { rels } = getProtoData(target)
+            const relation = rels.find(({ key }) => key === propKey)
+
+            if (relation && 'belongsTo' in relation) {
+              const splat: string[] = (value as string).split('/')
+
+              if (splat.length > 1) {
+                return splat.slice(1).join('/')
+              }
+
+              throw new Error(`URI '${value}' is invalid'`)
+            }
+
+            return slug(value.toString())
           })
         )
       },

@@ -2,6 +2,8 @@ import PouchFactory from './PouchFactory'
 import getSlothData from '../utils/getSlothData'
 import getProtoData from '../utils/getProtoData'
 import Dict from '../helpers/Dict'
+import { RelationDescriptor } from './relationDescriptors'
+import { join } from 'path'
 
 /**
  * Base abstract entity, for all entitoies
@@ -99,6 +101,76 @@ export default class BaseEntity<S> {
 
     getSlothData(this).docId = undefined
 
+    await this.removeRelations()
+
     return true
+  }
+
+  /**
+   * @private
+   */
+  removeRelations() {
+    const { rels } = getProtoData(this, false)
+
+    return Promise.all(
+      rels.map(rel => this.removeEntityRelation(rel))
+    ).then(() => {
+      return
+    })
+  }
+
+  protected getProp(key: string) {
+    return (this as any)[key]
+  }
+
+  protected getRelationDescriptor(
+    keyName: keyof S
+  ): RelationDescriptor & { key: string } {
+    const { rels } = getProtoData(this)
+    const rel = rels.find(rel => {
+      return rel.key === keyName
+    })
+
+    return rel!
+  }
+
+  protected getRelationEntity(keyName: keyof S) {
+    const rel = this.getRelationDescriptor(keyName)
+    const { factory } = getSlothData(this)
+
+    if ('belongsTo' in rel) {
+      return rel.belongsTo().findById(factory, this.getProp(keyName))
+    }
+
+    throw new Error(
+      `Cannot use getRelationEntity on ${keyName} as hasMany relation`
+    )
+  }
+
+  private async removeEntityRelation(
+    rel: RelationDescriptor & { key: string }
+  ) {
+    const { factory, name } = getSlothData(this)
+
+    if ('belongsTo' in rel && rel.cascade) {
+      const relId = this.getProp(rel.key)
+
+      const children = await factory(name).allDocs({
+        include_docs: false,
+        startkey: join(relId, '/'),
+        endkey: join(relId, '/\uffff')
+      })
+      if (children.rows.length === 0) {
+        const parent = await this.getRelationEntity(rel.key as any)
+
+        await parent.remove()
+      }
+    }
+
+    if ('hasMany' in rel && rel.cascade) {
+      // TODO
+
+      throw new Error('hasMany not implemented yet')
+    }
   }
 }

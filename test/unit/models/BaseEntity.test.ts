@@ -1,4 +1,5 @@
 import BaseEntity from '../../../src/models/BaseEntity'
+import { RelationDescriptor } from '../../../src/models/relationDescriptors'
 
 test('BaseEntity#isDirty returns false without any updated props', () => {
   expect(
@@ -159,4 +160,173 @@ test('BaseEntity#remove calls db.remove with _rev', async () => {
   expect(factory).toHaveBeenCalledWith('foos')
   expect(get).toHaveBeenCalledWith('foobar')
   expect(remove).toHaveBeenCalledWith('foobar', 'revision')
+})
+
+test('BaseEntity#removeRelations doesnt remove parent if cascade is set to false', async () => {
+  const allDocs = jest.fn().mockResolvedValue({ rows: { length: 0 } })
+  const factory = jest.fn().mockReturnValue({ allDocs })
+  const remove = jest.fn()
+  const belongsTo = jest.fn().mockResolvedValue({ remove })
+
+  const name = 'foobars'
+
+  const rels = [
+    {
+      belongsTo,
+      cascade: false,
+      key: 'foo'
+    }
+  ]
+
+  await BaseEntity.prototype.removeRelations.apply({
+    ...BaseEntity.prototype,
+    __protoData: { rels },
+    foo: 'bar',
+    sloth: {
+      factory,
+      name
+    }
+  })
+
+  expect(allDocs).not.toHaveBeenCalled()
+  expect(factory).not.toHaveBeenCalledWith(name)
+  expect(remove).not.toHaveBeenCalled()
+  expect(belongsTo).not.toHaveBeenCalled()
+})
+
+test('BaseEntity#removeRelations doesnt remove parent if has child', async () => {
+  const allDocs = jest.fn().mockResolvedValue({ rows: ['foo'] })
+  const factory = jest.fn().mockReturnValue({ allDocs })
+  const remove = jest.fn()
+  const belongsTo = jest.fn().mockResolvedValue({ remove })
+
+  const name = 'foobars'
+
+  const rels = [
+    {
+      belongsTo,
+      cascade: true,
+      key: 'foo'
+    }
+  ]
+
+  await BaseEntity.prototype.removeRelations.apply({
+    ...BaseEntity.prototype,
+    __protoData: { rels },
+    foo: 'bar',
+    sloth: {
+      factory,
+      name
+    }
+  })
+
+  expect(allDocs).toHaveBeenCalledWith({
+    include_docs: false,
+    startkey: 'bar/',
+    endkey: 'bar/\uffff'
+  })
+  expect(factory).toHaveBeenCalledWith(name)
+  expect(remove).not.toHaveBeenCalled()
+  expect(belongsTo).not.toHaveBeenCalled()
+})
+
+test('BaseEntity#removeRelations remove parent if no child', async () => {
+  const allDocs = jest.fn().mockResolvedValue({ rows: [] })
+  const factory = jest.fn().mockReturnValue({ allDocs })
+  const remove = jest.fn()
+  const findById = jest.fn().mockResolvedValue({ remove })
+  const belongsTo = jest.fn().mockReturnValue({ findById })
+
+  const name = 'foobars'
+
+  const rels = [
+    {
+      belongsTo,
+      cascade: true,
+      key: 'foo'
+    }
+  ]
+
+  await BaseEntity.prototype.removeRelations.apply({
+    ...BaseEntity.prototype,
+    __protoData: { rels },
+    foo: 'bar',
+    sloth: {
+      factory,
+      name
+    }
+  })
+
+  expect(allDocs).toHaveBeenCalledWith({
+    include_docs: false,
+    startkey: 'bar/',
+    endkey: 'bar/\uffff'
+  })
+  expect(factory).toHaveBeenCalledWith(name)
+  expect(remove).toHaveBeenCalled()
+  expect(belongsTo).toHaveBeenCalled()
+})
+
+test('BaseEntity#removeRelations remove parent if no child', async () => {
+  const allDocs = jest.fn().mockResolvedValue({ rows: [] })
+  const factory = jest.fn().mockReturnValue({ allDocs })
+  const remove = jest.fn()
+  const findById = jest.fn().mockResolvedValue({ remove })
+  const belongsTo = jest.fn().mockReturnValue({ findById })
+
+  const name = 'foobars'
+
+  const rels = [
+    {
+      belongsTo,
+      cascade: true,
+      key: 'foo'
+    }
+  ]
+
+  await BaseEntity.prototype.removeRelations.apply({
+    ...BaseEntity.prototype,
+    __protoData: { rels },
+    foo: 'bar',
+    sloth: {
+      factory,
+      name
+    }
+  })
+
+  expect(allDocs).toHaveBeenCalledWith({
+    include_docs: false,
+    startkey: 'bar/',
+    endkey: 'bar/\uffff'
+  })
+  expect(factory).toHaveBeenCalledWith(name)
+  expect(remove).toHaveBeenCalled()
+  expect(belongsTo).toHaveBeenCalled()
+})
+
+test('BaseEntity#removeRelations remove parent if no child', async () => {
+  const allDocs = jest.fn().mockResolvedValue({ rows: [] })
+  const factory = jest.fn().mockReturnValue({ allDocs })
+
+  const name = 'foobars'
+
+  const rels = [
+    {
+      hasMany: {},
+      cascade: true,
+      key: 'foo'
+    }
+  ]
+
+  await expect(
+    BaseEntity.prototype.removeRelations.apply({
+      ...BaseEntity.prototype,
+      __protoData: { rels },
+      foo: 'bar',
+      sloth: {
+        factory,
+        name
+      }
+    })
+  ).rejects.toMatchObject({ message: 'hasMany not implemented yet' })
 })

@@ -4,6 +4,7 @@ import slug from 'slug'
 import StaticData from '../models/StaticData'
 import PouchFactory from '../models/PouchFactory'
 import EntityConstructor from '../helpers/EntityConstructor'
+import getProtoData from '../utils/getProtoData'
 
 /**
  * This decorator is used to mark classes that will be an entity, a document
@@ -19,6 +20,10 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
     const constr = (constructor as any) as { desc: StaticData }
 
     constr.desc = { name }
+
+    const data = getProtoData(constructor.prototype, true)
+
+    data.name = name
 
     class WrappedEntity extends (constructor as EntityConstructor<any, any>) {
       sloth: SlothData<S>

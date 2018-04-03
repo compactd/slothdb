@@ -10,7 +10,7 @@ import ProtoData from '../models/ProtoData'
  */
 export default function getProtoData(
   obj: any,
-  createIfNotFound: boolean = true
+  createIfNotFound: boolean = false
 ) {
   const wrapped = obj as { __protoData?: ProtoData }
 
@@ -18,7 +18,8 @@ export default function getProtoData(
     if (createIfNotFound) {
       wrapped.__protoData = {
         uris: [],
-        fields: []
+        fields: [],
+        rels: []
       }
     } else {
       throw new Error(`Object ${wrapped} has no __protoData`)
