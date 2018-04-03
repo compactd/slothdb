@@ -44,6 +44,34 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
   }
 
   /**
+   * Fetches all documents IDs for this database and return them
+   * 
+   * @param {PouchFactory<S>} factory the PouchDB factory to use 
+   * @param {string} [startKey=''] the startkey to use
+   * @param {string} [endKey=path.join(startKey, '\uffff')] the endkey to use
+   * @returns a promise that resolves into an array of string IDs
+   * @see PouchDB#allDocs
+   * @memberof SlothDatabase
+   */
+  findAllIDs(
+    factory: PouchFactory<S>,
+    startKey = '',
+    endKey = join(startKey, '\uffff')
+  ) {
+    const db = factory(this._name)
+
+    return db
+      .allDocs({
+        include_docs: false,
+        startkey: startKey,
+        endkey: endKey
+      })
+      .then(({ rows }) => {
+        return rows.map(({ id }) => id)
+      })
+  }
+
+  /**
    * Fetches all documents for this database and map them with the model
    * 
    * @param {PouchFactory<S>} factory the PouchDB factory to use 

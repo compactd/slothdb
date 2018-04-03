@@ -27,6 +27,8 @@ test('SlothDatabase#create - create a model instance with props', async () => {
 })
 
 test('SlothDatabase#create - create a model instance with props', async () => {
+  const create = jest.fn().mockImplementation((omit: never, el: object) => el)
+
   const _model = jest.fn()
   const props = { _id: 'foos/bar', foo: 'bar' }
   const dbMock = {
@@ -50,8 +52,6 @@ test('SlothDatabase#create - create a model instance with props', async () => {
 })
 
 test('SlothDatabase#findAllDocs - calls allDocs and creates models', async () => {
-  const create = jest.fn().mockImplementation((omit: never, el: object) => el)
-
   const props = { _id: 'foos/bar', foo: 'bar' }
   const docs = [{ foo: 'bar' }, { bar: 'foo' }]
 
@@ -61,21 +61,18 @@ test('SlothDatabase#findAllDocs - calls allDocs and creates models', async () =>
   const factory = jest.fn().mockReturnValue({ allDocs })
 
   expect(
-    await SlothDatabase.prototype.findAllDocs.call(
-      { create, _name: 'foos' },
-      factory
-    )
+    await SlothDatabase.prototype.findAllDocs.call({ _name: 'foos' }, factory)
   ).toEqual(docs)
   expect(
     await SlothDatabase.prototype.findAllDocs.call(
-      { create, _name: 'foos' },
+      { _name: 'foos' },
       factory,
       'foos/bar'
     )
   ).toEqual(docs)
   expect(
     await SlothDatabase.prototype.findAllDocs.call(
-      { create, _name: 'foos' },
+      { _name: 'foos' },
       factory,
       'foo',
       'bar'
@@ -108,6 +105,64 @@ test('SlothDatabase#findAllDocs - calls allDocs and creates models', async () =>
     [
       {
         include_docs: true,
+        startkey: 'foo',
+        endkey: 'bar'
+      }
+    ]
+  ])
+})
+
+test('SlothDatabase#findAllID - calls allDocs and return ids', async () => {
+  const rows = ['foo', 'bar']
+
+  const allDocs = jest.fn().mockResolvedValue({ rows })
+
+  const factory = jest.fn().mockReturnValue({ allDocs })
+
+  expect(
+    await SlothDatabase.prototype.findAllDocs.call(
+      { create, _name: 'foos' },
+      factory
+    )
+  ).toEqual(rows)
+  expect(
+    await SlothDatabase.prototype.findAllDocs.call(
+      { create, _name: 'foos' },
+      factory,
+      'foos/bar'
+    )
+  ).toEqual(rows)
+  expect(
+    await SlothDatabase.prototype.findAllDocs.call(
+      { create, _name: 'foos' },
+      factory,
+      'foo',
+      'bar'
+    )
+  ).toEqual(rows)
+
+  expect(factory).toHaveBeenCalledTimes(3)
+  expect(factory).toHaveBeenCalledWith('foos')
+
+  expect(allDocs).toHaveBeenCalledTimes(3)
+  expect(allDocs.mock.calls).toMatchObject([
+    [
+      {
+        include_docs: false,
+        startkey: '',
+        endkey: '\uffff'
+      }
+    ],
+    [
+      {
+        include_docs: false,
+        startkey: 'foos/bar',
+        endkey: 'foos/bar/\uffff'
+      }
+    ],
+    [
+      {
+        include_docs: false,
         startkey: 'foo',
         endkey: 'bar'
       }
