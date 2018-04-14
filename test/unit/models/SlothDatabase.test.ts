@@ -1,5 +1,6 @@
 import SlothDatabase from '../../../src/models/SlothDatabase'
 import localPouchFactory from '../../utils/localPouchFactory'
+import emptyProtoData from '../../utils/emptyProtoData'
 
 test('SlothDatabase#constructor - sets the db name from desc', () => {
   const db1 = new SlothDatabase({ desc: { name: 'foos' } } as any)
@@ -223,5 +224,116 @@ describe('SlothDatabase#changes', () => {
     expect(on).toHaveBeenCalledTimes(1)
     expect(changes).toHaveBeenCalledTimes(1)
     expect(cancel).toHaveBeenCalled()
+  })
+})
+
+describe('SlothDatabase#initSetup', () => {
+  const proto = Object.assign({}, SlothDatabase.prototype, {
+    _model: {
+      prototype: {
+        __protoData: emptyProtoData({
+          views: [
+            {
+              id: 'views',
+              name: 'by_bar',
+              code: 'function (doc) { emit(doc.bar); }',
+              function: () => ({})
+            },
+            {
+              id: 'views',
+              name: 'by_barz',
+              code: 'function (doc) { emit(doc.barz); }',
+              function: () => ({})
+            }
+          ]
+        })
+      }
+    }
+  })
+
+  const get = jest.fn()
+  const put = jest.fn()
+
+  const factory = () => ({ get, put })
+
+  const sub1 = () => ({})
+  const sub2 = () => ({})
+
+  test(`Creates views if no document found`, async () => {
+    get.mockRejectedValue(new Error(''))
+    put.mockResolvedValue(null)
+
+    await SlothDatabase.prototype.initSetup.call(proto, factory)
+
+    expect(get).toHaveBeenCalledTimes(2)
+    expect(get).toHaveBeenCalledWith('_design/views')
+
+    expect(put).toHaveBeenCalledTimes(2)
+    expect(put.mock.calls).toEqual([
+      [
+        {
+          _id: '_design/views',
+          views: {
+            by_bar: { map: 'function (doc) { emit(doc.bar); }' }
+          }
+        }
+      ],
+      [
+        {
+          _id: '_design/views',
+          views: {
+            by_barz: { map: 'function (doc) { emit(doc.barz); }' }
+          }
+        }
+      ]
+    ])
+  })
+
+  test('Update document if already exists', async () => {
+    put.mockClear()
+    get.mockClear()
+
+    get.mockResolvedValue({
+      _rev: 'foobar',
+      views: {
+        by_foobar: {
+          map: 'foobar!'
+        }
+      }
+    })
+    put.mockResolvedValue(null)
+
+    await SlothDatabase.prototype.initSetup.call(proto, factory)
+
+    expect(get).toHaveBeenCalledTimes(2)
+    expect(get).toHaveBeenCalledWith('_design/views')
+
+    expect(put).toHaveBeenCalledTimes(2)
+    expect(put.mock.calls).toEqual([
+      [
+        {
+          _rev: 'foobar',
+          _id: '_design/views',
+          views: {
+            by_bar: { map: 'function (doc) { emit(doc.bar); }' },
+            by_foobar: {
+              map: 'foobar!'
+            }
+          }
+        }
+      ],
+      [
+        {
+          _rev: 'foobar',
+          _id: '_design/views',
+          views: {
+            by_barz: { map: 'function (doc) { emit(doc.barz); }' },
+            by_foobar: {
+              map: 'foobar!'
+            }
+          }
+        }
+      ]
+    ])
   })
 })

@@ -19,7 +19,8 @@ export default function getProtoData(
       wrapped.__protoData = {
         uris: [],
         fields: [],
-        rels: []
+        rels: [],
+        views: []
       }
     } else {
       throw new Error(`Object ${wrapped} has no __protoData`)

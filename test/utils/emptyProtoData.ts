@@ -4,7 +4,8 @@ export default function emptyProtoData(proto: Partial<ProtoData>) {
   const base: ProtoData = {
     uris: [],
     fields: [],
-    rels: []
+    rels: [],
+    views: []
   }
   return Object.assign({}, base, proto)
 }

@@ -5,6 +5,7 @@ import {
   SlothURI,
   SlothField,
   SlothRel,
+  SlothView,
   belongsToMapper
 } from '../../src/slothdb'
 import Artist from './Artist'
@@ -17,6 +18,12 @@ export interface TrackSchema {
   artist: string
   album: string
 }
+
+export enum TrackViews {
+  ByArtist = 'by_artist',
+  ByAlbum = 'views/by_album'
+}
+
 const artist = belongsToMapper(() => Artist, 'album')
 const album = belongsToMapper(() => Album, 'artist')
 
@@ -32,6 +39,7 @@ export class TrackEntity extends BaseEntity<TrackSchema> {
   @SlothRel({ belongsTo: () => Artist })
   artist: string = ''
 
+  @SlothView((doc: TrackSchema, emit) => emit(doc.album))
   @SlothRel({ belongsTo: () => Album })
   album: string = ''
 
@@ -41,4 +49,6 @@ export class TrackEntity extends BaseEntity<TrackSchema> {
   }
 }
 
-export default new SlothDatabase<TrackSchema, TrackEntity>(TrackEntity)
+export default new SlothDatabase<TrackSchema, TrackEntity, TrackViews>(
+  TrackEntity
+)

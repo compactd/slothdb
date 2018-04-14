@@ -27,5 +27,12 @@ export default interface ProtoData {
     key: string
   }[]
 
+  views: {
+    id: string
+    name: string
+    function: Function
+    code: string
+  }[]
+
   rels: (RelationDescriptor & { key: string })[]
 }

@@ -11,6 +11,7 @@ import {
 import PouchFactory from './models/PouchFactory'
 import { belongsToMapper } from './utils/relationMappers'
 import SlothDatabase from './models/SlothDatabase'
+import SlothView from './decorators/SlothView'
 
 export {
   SlothEntity,
@@ -25,5 +26,6 @@ export {
   BelongsToDescriptor,
   HasManyDescriptor,
   SlothDatabase,
+  SlothView,
   belongsToMapper
 }

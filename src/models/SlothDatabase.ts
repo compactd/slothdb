@@ -10,9 +10,13 @@ import { join } from 'path'
  * 
  * @typeparam S the database schema
  * @typeparam E the Entity
- * @typeparam T the entity constructor
+ * @typeparam V the (optional) view type that defines a list of possible view IDs
  */
-export default class SlothDatabase<S, E extends BaseEntity<S>> {
+export default class SlothDatabase<
+  S,
+  E extends BaseEntity<S>,
+  V extends string = never
+> {
   _root: string
   /**
    * 
@@ -51,6 +55,31 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
     } else {
       throw new Error('Please use SlothEntity')
     }
+  }
+
+  /**
+   * Queries and maps docs to Entity objects
+   * 
+   * @param factory the pouch factory
+   * @param view the view identifier
+   * @param startKey the optional startkey
+   * @param endKey the optional endkey
+   */
+  queryDocs(
+    factory: PouchFactory<S>,
+    view: V,
+    startKey = '',
+    endKey = join(startKey, '\uffff')
+  ) {
+    return factory(this._name)
+      .query(view, {
+        startkey: startKey,
+        endkey: endKey,
+        include_docs: true
+      })
+      .then(({ rows }) => {
+        return rows.map(({ doc }) => new this._model(factory, doc as any))
+      })
   }
 
   /**
@@ -142,6 +171,17 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
   }
 
   /**
+   * Create a new model instance and save it to database
+   * @param factory The database factory to attach to the model
+   * @param props the entity properties
+   * @returns an entity instance 
+   */
+  put(factory: PouchFactory<S>, props: Partial<S>) {
+    const doc = new this._model(factory, props)
+    return doc.save().then(() => doc)
+  }
+
+  /**
    * Subscribes a function to PouchDB changes, so that
    * the function will be called when changes are made
    * 
@@ -205,11 +245,62 @@ export default class SlothDatabase<S, E extends BaseEntity<S>> {
     }
   }
 
+  /**
+   * Creates view documents (if required)
+   * @param factory 
+   */
+  async initSetup(factory: PouchFactory<S>) {
+    await this.setupViews(factory)
+  }
+
   protected getSubscriberFor(factory: PouchFactory<S>) {
     return this._subscribers.find(el => el.factory === factory)
   }
 
   protected dispatch(action: ChangeAction<S>) {
     this._subscribers.forEach(({ sub }) => sub(action))
+  }
+
+  private setupViews(factory: PouchFactory<S>): Promise<void> {
+    const { views } = getProtoData(this._model.prototype)
+    const db = factory(this._name)
+
+    const promises = views.map(({ name, id, code }) => async () => {
+      const views = {}
+      let _rev
+
+      try {
+        const doc = (await db.get(`_design/${id}`)) as any
+
+        if (doc.views[name] && doc.views[name].map === code) {
+          // view already exists and is up-to-date
+          return
+        }
+
+        Object.assign(views, doc.views)
+
+        _rev = doc._rev
+      } catch (err) {
+        // Do nothing
+      }
+
+      await db.put(Object.assign(
+        {},
+        {
+          _id: `_design/${id}`,
+          views: {
+            ...views,
+            [name]: {
+              map: code
+            }
+          }
+        },
+        _rev ? { _rev } : {}
+      ) as any)
+    })
+
+    return promises.reduce((acc, fn) => {
+      return acc.then(() => fn())
+    }, Promise.resolve())
   }
 }
