@@ -1,10 +1,11 @@
 import BaseEntity from '../models/BaseEntity'
 import SlothData from '../models/SlothData'
-import slug from 'slug'
 import StaticData from '../models/StaticData'
 import PouchFactory from '../models/PouchFactory'
 import EntityConstructor from '../helpers/EntityConstructor'
 import getProtoData from '../utils/getProtoData'
+
+const slug = require('limax')
 
 /**
  * This decorator is used to mark classes that will be an entity, a document

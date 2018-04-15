@@ -23,7 +23,7 @@ test('generate uri', async () => {
     artist: flatbushZombies._id
   })
 
-  expect(betterOffDead._id).toBe('library/Flatbush-Zombies/BetterOffDead')
+  expect(betterOffDead._id).toBe('library/flatbush-zombies/betteroffdead')
 })
 
 test('updated uri', async () => {
@@ -37,11 +37,11 @@ test('updated uri', async () => {
     name: 'BetterOffDead',
     artist: 'library/flatbush'
   })
-  expect(betterOffDead._id).toBe('library/flatbush/BetterOffDead')
+  expect(betterOffDead._id).toBe('library/flatbush/betteroffdead')
 
-  betterOffDead.artist = 'library/Flatbush-Zombies'
+  betterOffDead.artist = 'library/flatbush-zombies'
 
-  expect(betterOffDead._id).toBe('library/Flatbush-Zombies/BetterOffDead')
+  expect(betterOffDead._id).toBe('library/flatbush-zombies/betteroffdead')
 })
 
 test('remove parent if last child is removed', async () => {
@@ -61,22 +61,22 @@ test('remove parent if last child is removed', async () => {
 
   await betterOffDead.save()
 
-  expect(await db.get('library/Flatbush-Zombies/BetterOffDead')).toMatchObject({
-    _id: 'library/Flatbush-Zombies/BetterOffDead',
-    artist: 'library/Flatbush-Zombies'
+  expect(await db.get('library/flatbush-zombies/betteroffdead')).toMatchObject({
+    _id: 'library/flatbush-zombies/betteroffdead',
+    artist: 'library/flatbush-zombies'
   })
 
-  expect(await db.get('library/Flatbush-Zombies')).toMatchObject({
-    _id: 'library/Flatbush-Zombies',
+  expect(await db.get('library/flatbush-zombies')).toMatchObject({
+    _id: 'library/flatbush-zombies',
     name: 'Flatbush Zombies'
   })
 
   await betterOffDead.remove()
-  await expect(db.get('library/Flatbush-Zombies')).rejects.toMatchObject({
+  await expect(db.get('library/flatbush-zombies')).rejects.toMatchObject({
     message: 'missing'
   })
   await expect(
-    db.get('library/Flatbush-Zombies/BetterOffDead')
+    db.get('library/flatbush-zombies/betteroffdead')
   ).rejects.toMatchObject({ message: 'missing' })
 })
 
@@ -104,39 +104,39 @@ test('doesnt remove parent if still has children', async () => {
 
   await vacationInHell.save()
 
-  expect(await db.get('library/Flatbush-Zombies/BetterOffDead')).toMatchObject({
-    _id: 'library/Flatbush-Zombies/BetterOffDead',
-    artist: 'library/Flatbush-Zombies'
+  expect(await db.get('library/flatbush-zombies/betteroffdead')).toMatchObject({
+    _id: 'library/flatbush-zombies/betteroffdead',
+    artist: 'library/flatbush-zombies'
   })
 
   expect(
-    await db.get('library/Flatbush-Zombies/Vacation-In-Hell')
+    await db.get('library/flatbush-zombies/vacation-in-hell')
   ).toMatchObject({
-    _id: 'library/Flatbush-Zombies/Vacation-In-Hell',
-    artist: 'library/Flatbush-Zombies'
+    _id: 'library/flatbush-zombies/vacation-in-hell',
+    artist: 'library/flatbush-zombies'
   })
 
-  expect(await db.get('library/Flatbush-Zombies')).toMatchObject({
-    _id: 'library/Flatbush-Zombies',
+  expect(await db.get('library/flatbush-zombies')).toMatchObject({
+    _id: 'library/flatbush-zombies',
     name: 'Flatbush Zombies'
   })
 
   await betterOffDead.remove()
 
   expect(
-    await db.get('library/Flatbush-Zombies/Vacation-In-Hell')
+    await db.get('library/flatbush-zombies/vacation-in-hell')
   ).toMatchObject({
-    _id: 'library/Flatbush-Zombies/Vacation-In-Hell',
-    artist: 'library/Flatbush-Zombies'
+    _id: 'library/flatbush-zombies/vacation-in-hell',
+    artist: 'library/flatbush-zombies'
   })
 
-  expect(await db.get('library/Flatbush-Zombies')).toMatchObject({
-    _id: 'library/Flatbush-Zombies',
+  expect(await db.get('library/flatbush-zombies')).toMatchObject({
+    _id: 'library/flatbush-zombies',
     name: 'Flatbush Zombies'
   })
 
   await expect(
-    db.get('library/Flatbush-Zombies/BetterOffDead')
+    db.get('library/flatbush-zombies/betteroffdead')
   ).rejects.toMatchObject({ message: 'missing' })
 })
 
@@ -157,6 +157,6 @@ test('rels.artist - maps with artist', async () => {
 
   const flatbush = await betterOffDead.rels.artist(factory)
 
-  expect(flatbush._id).toBe('library/Flatbush-Zombies')
+  expect(flatbush._id).toBe('library/flatbush-zombies')
   expect(flatbush.name).toBe('Flatbush Zombies')
 })

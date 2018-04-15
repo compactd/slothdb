@@ -49,7 +49,7 @@ describe('nested objects', () => {
         barz: 'foobarbarz'
       }
     })
-    expect(await factory('foos').get('foos/Foobar')).toMatchObject({
+    expect(await factory('foos').get('foos/foobar')).toMatchObject({
       name: 'Foobar',
       foo: {
         bar: 'foobar',
@@ -59,7 +59,7 @@ describe('nested objects', () => {
   })
 
   test('get a document with a nested doc', async () => {
-    const { foo } = await Foo.findById(factory, 'foos/Foobar')
+    const { foo } = await Foo.findById(factory, 'foos/foobar')
     expect(foo).toEqual({
       bar: 'foobar',
       barz: 'foobarbarz'
@@ -67,7 +67,7 @@ describe('nested objects', () => {
   })
 
   test('update a document with a nested doc', async () => {
-    const foo = await Foo.findById(factory, 'foos/Foobar')
+    const foo = await Foo.findById(factory, 'foos/foobar')
 
     foo.foo = { bar: 'bar', barz: 'barz' }
 
@@ -78,7 +78,7 @@ describe('nested objects', () => {
 
     await foo.save()
 
-    expect(await factory('foos').get('foos/Foobar')).toMatchObject({
+    expect(await factory('foos').get('foos/foobar')).toMatchObject({
       name: 'Foobar',
       foo: {
         bar: 'bar',

@@ -1,6 +1,6 @@
 import SlothURI from '../../../src/decorators/SlothURI'
 import emptyProtoData from '../../utils/emptyProtoData'
-import slug from 'slug'
+const slug = require('limax')
 
 test('SlothURI - returns correct url', () => {
   const object = {
