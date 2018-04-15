@@ -7,12 +7,32 @@ PouchDB.plugin(require('pouchdb-adapter-memory'))
 test('creates a new author from props with valid props', () => {
   const grr = AuthorDatabase.create(localPouchFactory, { name: 'GRR Martin' })
   expect(grr.name).toBe('GRR Martin')
-  expect(grr._id).toBe('authors/GRR-Martin')
+  expect(grr._id).toBe('authors/grr-martin')
+})
+
+test('exists returns false for a non-existing doc', async () => {
+  const dbName = Date.now().toString(26)
+  const factory = () => new PouchDB(dbName, { adapter: 'memory' })
+
+  const doc = AuthorDatabase.create(factory, { name: 'Foobar' })
+
+  expect(await doc.exists()).toBe(false)
+})
+
+test('exists returns true for existing doc', async () => {
+  const dbName = Date.now().toString(26)
+  const factory = () => new PouchDB(dbName, { adapter: 'memory' })
+
+  await AuthorDatabase.put(factory, { name: 'Foobar' })
+
+  const doc = AuthorDatabase.create(factory, { name: 'Foobar' })
+
+  expect(await doc.exists()).toBe(true)
 })
 
 test('find author by id', async () => {
   const dbName = Date.now().toString(26)
-  const props = { _id: 'authors/GRR-Martin', name: 'GRR Martin' }
+  const props = { _id: 'authors/grr-martin', name: 'GRR Martin' }
 
   const factory = () => new PouchDB(dbName, { adapter: 'memory' })
 
@@ -27,10 +47,10 @@ test('find author by id', async () => {
 test('isDirty returns true with updated props', () => {
   const grr = AuthorDatabase.create(localPouchFactory, {
     name: 'GRR Martin',
-    _id: 'authors/GRR-Martin'
+    _id: 'authors/grr-martin'
   })
   expect(grr.name).toBe('GRR Martin')
-  expect(grr._id).toBe('authors/GRR-Martin')
+  expect(grr._id).toBe('authors/grr-martin')
   expect(grr.isDirty()).toBe(false)
 
   grr.name = 'grr martin'
@@ -45,7 +65,7 @@ test('save creates, update and eventually remove old document', async () => {
   const factory = () => new PouchDB(dbName, { adapter: 'memory' })
 
   const doc = await AuthorDatabase.create(factory, props)
-  const originalId = 'authors/GRR-Martin'
+  const originalId = 'authors/grr-martin'
 
   expect(doc._id).toBe(originalId)
 
@@ -69,7 +89,7 @@ test('save creates, update and eventually remove old document', async () => {
 
   {
     doc.name = 'George RR Martin'
-    const newId = 'authors/George-RR-Martin'
+    const newId = 'authors/george-rr-martin'
     expect(doc._id)
 
     const { _rev, _id } = await doc.save()
@@ -86,7 +106,7 @@ test('save creates, update and eventually remove old document', async () => {
     expect(newDoc).toMatchObject({
       name: 'George RR Martin',
       age: 70,
-      _id: 'authors/George-RR-Martin'
+      _id: 'authors/george-rr-martin'
     })
   }
 })
@@ -98,7 +118,7 @@ test('save creates, update and eventually remove old document', async () => {
   const factory = () => new PouchDB(dbName, { adapter: 'memory' })
 
   const doc = await AuthorDatabase.create(factory, props)
-  const originalId = 'authors/GRR-Martin'
+  const originalId = 'authors/grr-martin'
 
   expect(doc._id).toBe(originalId)
 
@@ -122,7 +142,7 @@ test('save creates, update and eventually remove old document', async () => {
 
   {
     doc.name = 'George RR Martin'
-    const newId = 'authors/George-RR-Martin'
+    const newId = 'authors/george-rr-martin'
     expect(doc._id)
 
     const { _rev, _id } = await doc.save()
@@ -139,7 +159,7 @@ test('save creates, update and eventually remove old document', async () => {
     expect(newDoc).toMatchObject({
       name: 'George RR Martin',
       age: 70,
-      _id: 'authors/George-RR-Martin'
+      _id: 'authors/george-rr-martin'
     })
   }
 })

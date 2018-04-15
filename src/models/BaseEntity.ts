@@ -82,6 +82,22 @@ export default class BaseEntity<S> {
       throw err
     }
   }
+
+  /**
+   * Returns whether the specified document exists in database
+   * Please note that this does not compare documents
+   */
+  async exists() {
+    const { name, factory } = getSlothData(this)
+    try {
+      await factory(name).get(this._id)
+
+      return true
+    } catch (err) {
+      return false
+    }
+  }
+
   /**
    * Remove a document from the database
    * @returns a Promise that resolves into a boolean, true if document was removed,
