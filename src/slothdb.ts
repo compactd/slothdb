@@ -12,6 +12,7 @@ import PouchFactory from './models/PouchFactory'
 import { belongsToMapper } from './utils/relationMappers'
 import SlothDatabase from './models/SlothDatabase'
 import SlothView from './decorators/SlothView'
+import SlothIndex from './decorators/SlothIndex'
 
 export {
   SlothEntity,
@@ -27,5 +28,6 @@ export {
   HasManyDescriptor,
   SlothDatabase,
   SlothView,
+  SlothIndex,
   belongsToMapper
 }
