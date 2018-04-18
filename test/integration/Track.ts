@@ -2,6 +2,7 @@ import {
   BaseEntity,
   SlothDatabase,
   SlothEntity,
+  SlothIndex,
   SlothURI,
   SlothField,
   SlothRel,
@@ -32,7 +33,9 @@ export class TrackEntity extends BaseEntity<TrackSchema> {
   @SlothURI('library', 'album', 'number', 'name')
   _id: string = ''
 
-  @SlothField() name: string = 'Track Name'
+  @SlothField()
+  @SlothIndex()
+  name: string = 'Track Name'
 
   @SlothField() number: string = '00'
 

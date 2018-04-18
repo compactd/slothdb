@@ -177,10 +177,6 @@ test('SlothDatabase#findAllIDs - calls allDocs and return ids', async () => {
   ])
 })
 
-describe('SlothDatabase#subscribe', () => {
-  test('')
-})
-
 describe('SlothDatabase#changes', () => {
   const proto = Object.assign({}, SlothDatabase.prototype, { _subscribers: [] })
 

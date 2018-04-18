@@ -39,6 +39,16 @@ describe('views', () => {
     })
   })
 
+  test('doesnt recreate views', async () => {
+    const tracks = factory('tracks')
+    const { _rev } = await tracks.get('_design/views')
+    await Track.initSetup(factory)
+    expect(await tracks.get('_design/views')).toMatchObject({
+      views: { by_album: {} },
+      _rev
+    })
+  })
+
   test('query by view', async () => {
     const docs = await Track.queryDocs(
       factory,
@@ -47,5 +57,31 @@ describe('views', () => {
     )
 
     expect(docs.length).toBe(2)
+  })
+  test('queryKeys', async () => {
+    const docs = await Track.queryKeys(
+      factory,
+      TrackViews.ByAlbum,
+      'library/flatbush-zombies'
+    )
+
+    expect(docs.length).toBe(2)
+    expect(docs).toEqual([
+      'library/flatbush-zombies/betteroffdead',
+      'library/flatbush-zombies/betteroffdead-2'
+    ])
+  })
+  test('queryKeysIDs', async () => {
+    const docs = await Track.queryKeysIDs(
+      factory,
+      TrackViews.ByAlbum,
+      'library/flatbush-zombies'
+    )
+    expect(docs).toEqual({
+      'library/flatbush-zombies/betteroffdead':
+        'library/flatbush-zombies/betteroffdead/12/palm-trees',
+      'library/flatbush-zombies/betteroffdead-2':
+        'library/flatbush-zombies/betteroffdead-2/12/not-palm-trees'
+    })
   })
 })

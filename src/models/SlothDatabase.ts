@@ -4,6 +4,7 @@ import { Subscriber, ChangeAction, ActionType } from './changes'
 import EntityConstructor from '../helpers/EntityConstructor'
 import getProtoData from '../utils/getProtoData'
 import { join } from 'path'
+import Dict from '../helpers/Dict'
 
 /**
  * This represent a Database
@@ -79,6 +80,59 @@ export default class SlothDatabase<
       })
       .then(({ rows }) => {
         return rows.map(({ doc }) => new this._model(factory, doc as any))
+      })
+  }
+
+  /**
+   * Queries keys. Returns an array of emitted keys
+   * 
+   * @param factory the pouch factory
+   * @param view the view identifier
+   * @param startKey the optional startkey
+   * @param endKey the optional endkey
+   */
+  queryKeys(
+    factory: PouchFactory<S>,
+    view: V,
+    startKey = '',
+    endKey = join(startKey, '\uffff')
+  ): Promise<string[]> {
+    return factory(this._name)
+      .query(view, {
+        startkey: startKey,
+        endkey: endKey,
+        include_docs: false
+      })
+      .then(({ rows }) => {
+        return rows.map(({ key }) => key)
+      })
+  }
+
+  /**
+   * Queries keys/_id map. Returns a map of emitted keys/ID
+   * 
+   * @param factory the pouch factory
+   * @param view the view identifier
+   * @param startKey the optional startkey
+   * @param endKey the optional endkey
+   */
+  queryKeysIDs(
+    factory: PouchFactory<S>,
+    view: V,
+    startKey = '',
+    endKey = join(startKey, '\uffff')
+  ) {
+    return factory(this._name)
+      .query(view, {
+        startkey: startKey,
+        endkey: endKey,
+        include_docs: false
+      })
+      .then(({ rows }) => {
+        return rows.reduce(
+          (acc, { key, id }) => ({ ...acc, [key]: id }),
+          {} as Dict<string>
+        )
       })
   }
 
