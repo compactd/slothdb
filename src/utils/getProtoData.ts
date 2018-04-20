@@ -22,8 +22,6 @@ export default function getProtoData(
         rels: [],
         views: []
       }
-    } else {
-      throw new Error(`Object ${wrapped} has no __protoData`)
     }
   }
 

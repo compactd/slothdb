@@ -5,6 +5,9 @@ import EntityConstructor from '../helpers/EntityConstructor'
 import getProtoData from '../utils/getProtoData'
 import { join } from 'path'
 import Dict from '../helpers/Dict'
+import Debug from 'debug'
+
+const debug = Debug('slothdb')
 
 /**
  * This represent a Database
@@ -71,7 +74,7 @@ export default class SlothDatabase<
     view: V,
     startKey = '',
     endKey = join(startKey, '\uffff')
-  ) {
+  ): Promise<E[]> {
     return factory(this._name)
       .query(view, {
         startkey: startKey,
@@ -80,6 +83,16 @@ export default class SlothDatabase<
       })
       .then(({ rows }) => {
         return rows.map(({ doc }) => new this._model(factory, doc as any))
+      })
+      .catch(err => {
+        if (err.name === 'not_found') {
+          debug(`Design document '%s' is missing, generating views...`, view)
+          return this.initSetup(factory).then(() => {
+            debug('Created design documents')
+            return this.queryDocs(factory, view, startKey, endKey)
+          })
+        }
+        throw err
       })
   }
 
@@ -106,6 +119,16 @@ export default class SlothDatabase<
       .then(({ rows }) => {
         return rows.map(({ key }) => key)
       })
+      .catch(err => {
+        if (err.name === 'not_found') {
+          debug(`Design document '%s' is missing, generating views...`, view)
+          return this.initSetup(factory).then(() => {
+            debug('Created design documents')
+            return this.queryKeys(factory, view, startKey, endKey)
+          })
+        }
+        throw err
+      })
   }
 
   /**
@@ -121,7 +144,7 @@ export default class SlothDatabase<
     view: V,
     startKey = '',
     endKey = join(startKey, '\uffff')
-  ) {
+  ): Promise<Dict<string>> {
     return factory(this._name)
       .query(view, {
         startkey: startKey,
@@ -133,6 +156,16 @@ export default class SlothDatabase<
           (acc, { key, id }) => ({ ...acc, [key]: id }),
           {} as Dict<string>
         )
+      })
+      .catch(err => {
+        if (err.name === 'not_found') {
+          debug(`Design document '%s' is missing, generating views...`, view)
+          return this.initSetup(factory).then(() => {
+            debug('Created design documents')
+            return this.queryKeysIDs(factory, view, startKey, endKey)
+          })
+        }
+        throw err
       })
   }
 
@@ -246,6 +279,7 @@ export default class SlothDatabase<
    */
   subscribe(factory: PouchFactory<S>, sub: Subscriber<S>) {
     if (!this.getSubscriberFor(factory)) {
+      debug('Creating changes ')
       const changes = factory(this._name)
         .changes({
           since: 'now',
@@ -254,20 +288,20 @@ export default class SlothDatabase<
         })
         .on('change', ({ deleted, doc, id }) => {
           if (deleted || !doc) {
-            return this.dispatch({
+            return this.dispatch(factory, {
               type: ActionType.REMOVED,
               payload: { [this._name]: id },
               meta: {}
             })
           }
           if (doc._rev.match(/^1-/)) {
-            return this.dispatch({
+            return this.dispatch(factory, {
               type: ActionType.ADDED,
               payload: { [this._name]: doc },
               meta: { revision: doc._rev }
             })
           }
-          return this.dispatch({
+          return this.dispatch(factory, {
             type: ActionType.CHANGED,
             payload: { [this._name]: doc },
             meta: { revision: doc._rev }
@@ -311,8 +345,10 @@ export default class SlothDatabase<
     return this._subscribers.find(el => el.factory === factory)
   }
 
-  protected dispatch(action: ChangeAction<S>) {
-    this._subscribers.forEach(({ sub }) => sub(action))
+  protected dispatch(facto: PouchFactory<any>, action: ChangeAction<S>) {
+    this._subscribers.forEach(
+      ({ sub, factory }) => facto === factory && sub(action)
+    )
   }
 
   private setupViews(factory: PouchFactory<S>): Promise<void> {

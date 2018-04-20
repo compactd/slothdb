@@ -49,6 +49,16 @@ describe('views', () => {
     })
   })
 
+  test('creates views on a new database when querying docs', async () => {
+    const prefix = Date.now().toString(26) + '_'
+
+    const factory = (name: string) =>
+      new PouchDB(prefix + name, { adapter: 'memory' })
+
+    const docs = await Track.queryDocs(factory, TrackViews.ByAlbum)
+    expect(docs).toHaveLength(0)
+  })
+
   test('query by view', async () => {
     const docs = await Track.queryDocs(
       factory,
@@ -56,7 +66,7 @@ describe('views', () => {
       'library/flatbush-zombies'
     )
 
-    expect(docs.length).toBe(2)
+    expect(docs).toHaveLength(2)
   })
   test('queryKeys', async () => {
     const docs = await Track.queryKeys(
