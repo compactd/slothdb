@@ -7,9 +7,21 @@ test('SlothView - fails without a decorator', () => {
     /Required SlothView/
   )
 })
-
 test('SlothView - generates a working function for es5 view', () => {
   const proto = emptyProtoData({})
+  const obj = { __protoData: proto }
+
+  Reflect.defineProperty(obj, 'foo', { get: () => 42 })
+
+  expect(() =>
+    SlothView(function(doc: { bar: string }, emit) {
+      emit(doc.bar)
+    })(obj, 'foo')
+  ).toThrowError(/Required SlothView/)
+})
+
+test('SlothView - generates a working function for es5 view', () => {
+  const proto = emptyProtoData({ fields: [{ key: 'foo', docKey: 'foo' }] })
   const obj = { __protoData: proto }
 
   Reflect.defineProperty(obj, 'foo', { get: () => 42 })

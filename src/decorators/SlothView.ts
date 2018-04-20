@@ -33,11 +33,17 @@ export default function SlothView<S, V extends string = string>(
       (${fn.toString()})(__doc, emit);
     }`
 
-    const { views } = getProtoData(target, true)
+    const { views, fields } = getProtoData(target, true)
+
+    const field = fields.find(field => field.key === key)
+
+    if (!field) {
+      throw new Error('Required SlothView on top of a SlothField')
+    }
 
     views.push({
       id: docId,
-      name: viewId || `by_${key}`,
+      name: viewId || `by_${field.docKey}`,
       function: fn,
       code: fun
     })

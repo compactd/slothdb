@@ -21,8 +21,18 @@ export default function SlothIndex<S, V extends string = string>(
   docId?: string
 ) {
   return (target: object, key: string) => {
+    const field = getProtoData(target).fields.find(field => field.key === key)
+
+    if (!field) {
+      throw new Error('Please use SlothIndex on top of a SlothField')
+    }
+
     SlothView(
-      new Function('doc', 'emit', `emit(doc['${key}'].toString());`) as any,
+      new Function(
+        'doc',
+        'emit',
+        `emit(doc['${field.docKey}'].toString());`
+      ) as any,
       viewId,
       docId
     )(target, key)

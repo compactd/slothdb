@@ -33,8 +33,8 @@ export class TrackEntity extends BaseEntity<TrackSchema> {
   @SlothURI('library', 'album', 'number', 'name')
   _id: string = ''
 
-  @SlothField()
   @SlothIndex()
+  @SlothField()
   name: string = 'Track Name'
 
   @SlothField() number: string = '00'

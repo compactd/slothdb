@@ -2,6 +2,14 @@ import Artist from './Artist'
 import Track, { TrackViews } from './Track'
 import PouchDB from 'pouchdb'
 import delay from '../utils/delay'
+import {
+  SlothEntity,
+  BaseEntity,
+  SlothURI,
+  SlothField,
+  SlothDatabase,
+  SlothIndex
+} from '../../src/slothdb'
 
 PouchDB.plugin(require('pouchdb-adapter-memory'))
 
@@ -113,5 +121,39 @@ describe('views', () => {
       'library/flatbush-zombies/betteroffdead-2':
         'library/flatbush-zombies/betteroffdead-2/12/not-palm-trees'
     })
+  })
+})
+
+describe('views and docKeys', () => {
+  const prefix = Date.now().toString(26) + '_'
+
+  const factory = (name: string) =>
+    new PouchDB(prefix + name, { adapter: 'memory' })
+
+  @SlothEntity('foos')
+  class FooEnt extends BaseEntity<any> {
+    @SlothURI('foos', 'name')
+    _id = ''
+
+    @SlothIndex()
+    @SlothField('not_name')
+    name = ''
+  }
+
+  const Foo = new SlothDatabase<any, any, string>(FooEnt)
+
+  test('uses docKeys', async () => {
+    await Foo.put(factory, { name: 'foo' })
+    await Foo.put(factory, { name: 'foobar' })
+    await Foo.put(factory, { name: 'bar' })
+
+    const keys = await Foo.queryKeys(
+      factory,
+      'views/by_not_name',
+      'foo',
+      'foo\uffff'
+    )
+
+    expect(keys).toEqual(['foo', 'foobar'])
   })
 })
