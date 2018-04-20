@@ -59,6 +59,26 @@ describe('views', () => {
     expect(docs).toHaveLength(0)
   })
 
+  test('creates views on a new database when querying keys', async () => {
+    const prefix = Date.now().toString(26) + '_'
+
+    const factory = (name: string) =>
+      new PouchDB(prefix + name, { adapter: 'memory' })
+
+    const docs = await Track.queryKeys(factory, TrackViews.ByAlbum)
+    expect(docs).toHaveLength(0)
+  })
+
+  test('creates views on a new database when querying keys ids', async () => {
+    const prefix = Date.now().toString(26) + '_'
+
+    const factory = (name: string) =>
+      new PouchDB(prefix + name, { adapter: 'memory' })
+
+    const docs = await Track.queryKeysIDs(factory, TrackViews.ByAlbum)
+    expect(docs).toEqual({})
+  })
+
   test('query by view', async () => {
     const docs = await Track.queryDocs(
       factory,
