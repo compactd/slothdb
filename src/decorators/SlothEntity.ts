@@ -4,8 +4,26 @@ import StaticData from '../models/StaticData'
 import PouchFactory from '../models/PouchFactory'
 import EntityConstructor from '../helpers/EntityConstructor'
 import getProtoData from '../utils/getProtoData'
+import ProtoData from '../models/ProtoData'
 
 const slug = require('limax')
+
+function mapPropsOrDocToDocument({ fields }: ProtoData, data: any) {
+  return fields.reduce(
+    (props, { key, docKey }) => {
+      if (!(key in data) && !(docKey in data)) {
+        return props
+      }
+      if (key in data && docKey in data && key !== docKey) {
+        throw new Error(`Both '${key}' and '${docKey}' exist on ${data}`)
+      }
+      return Object.assign({}, props, {
+        [docKey]: key in data ? data[key] : data[docKey]
+      })
+    },
+    {} as any
+  )
+}
 
 /**
  * This decorator is used to mark classes that will be an entity, a document
@@ -44,7 +62,7 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
           this.sloth = {
             name,
             updatedProps: {},
-            props: idOrProps,
+            props: mapPropsOrDocToDocument(getProtoData(this), idOrProps),
             docId: idOrProps._id,
             factory,
             slug

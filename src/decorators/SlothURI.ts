@@ -40,7 +40,7 @@ export default function SlothURI<S>(prefix: string, ...propsKeys: (keyof S)[]) {
       propsKeys
     })
 
-    fields.push({ key })
+    fields.push({ key, docKey: key })
 
     Reflect.defineProperty(target, key, {
       get: function() {

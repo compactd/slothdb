@@ -46,7 +46,7 @@ test('SlothURI - pushes to uris', () => {
     }
   ])
 
-  expect(__protoData.fields).toEqual([{ key: '_id' }])
+  expect(__protoData.fields).toEqual([{ key: '_id', docKey: '_id' }])
 })
 
 test('SlothURI - throws if on top of another decorator', () => {

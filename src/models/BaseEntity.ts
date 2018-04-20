@@ -25,6 +25,32 @@ export default class BaseEntity<S> {
   }
 
   /**
+   * Returns a list of props following the entity schema
+   */
+  getProps(): S {
+    const { fields } = getProtoData(this)
+    return fields.reduce(
+      (props, { key }) => {
+        return Object.assign({}, props, { [key]: (this as any)[key] })
+      },
+      {} as any
+    )
+  }
+
+  /**
+   * Returns a list of props mapped with docKey
+   */
+  getDocument() {
+    const { fields } = getProtoData(this)
+    return fields.reduce(
+      (props, { key, docKey }) => {
+        return Object.assign({}, props, { [docKey]: (this as any)[key] })
+      },
+      {} as any
+    )
+  }
+
+  /**
    * Saves document to database. If the document doesn't exist,
    * create it. If it exists, update it. If the _id was changed
    * (due to props changing), remove to old document and create a new one
@@ -39,15 +65,10 @@ export default class BaseEntity<S> {
    */
   async save(): Promise<S & { _rev?: string }> {
     const { fields } = getProtoData(this, false)
-
-    const props: S = fields
-      .map(({ key }) => {
-        return { [key]: (this as any)[key] }
-      })
-      .reduce((acc, val) => ({ ...acc, ...val }), {}) as any
+    const doc = this.getDocument()
 
     if (!this.isDirty()) {
-      return props as S
+      return doc
     }
 
     const { factory, name, docId } = getSlothData(this)
@@ -56,11 +77,11 @@ export default class BaseEntity<S> {
     try {
       const { _rev } = await db.get(this._id)
 
-      const { rev } = await db.put(Object.assign({}, props, { _rev }))
+      const { rev } = await db.put(Object.assign({}, doc, { _rev }))
 
       getSlothData(this).docId = this._id
 
-      return Object.assign({}, props, { _rev: rev })
+      return Object.assign({}, doc, { _rev: rev })
     } catch (err) {
       // Then document was not found
 
@@ -72,11 +93,11 @@ export default class BaseEntity<S> {
 
           getSlothData(this).docId = this._id
         }
-        const { rev, id } = await db.put(props)
+        const { rev, id } = await db.put(doc)
 
         getSlothData(this).docId = this._id
 
-        return Object.assign({}, props, { _rev: rev })
+        return Object.assign({}, doc, { _rev: rev })
       }
 
       throw err

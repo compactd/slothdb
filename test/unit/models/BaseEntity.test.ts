@@ -30,16 +30,20 @@ test('BaseEntity#save immediately returns props if not dirty', async () => {
   expect(
     await BaseEntity.prototype.save.call({
       isDirty,
+      getDocument: () => 'foo',
       __protoData: { fields: [{ key: 'foo' }] },
       foo: 'bar'
     })
-  ).toEqual({ foo: 'bar' })
+  ).toEqual('foo')
 
   expect(isDirty).toHaveBeenCalled()
 })
 
 test('BaseEntity#save create doc if does not exist', async () => {
   const isDirty = jest.fn().mockReturnValue(true)
+  const getDocument = jest
+    .fn()
+    .mockReturnValue({ _id: 'foos/bar', name: 'bar' })
 
   const get = jest.fn().mockRejectedValue({ name: 'not_found' })
   const put = jest.fn().mockResolvedValue({ rev: 'revision' })
@@ -48,6 +52,7 @@ test('BaseEntity#save create doc if does not exist', async () => {
 
   const { _rev } = await BaseEntity.prototype.save.call({
     isDirty,
+    getDocument,
     __protoData: {
       fields: [{ key: '_id' }, { key: 'name' }]
     },
@@ -68,6 +73,7 @@ test('BaseEntity#save create doc if does not exist', async () => {
 
 test('BaseEntity#save remove previous doc', async () => {
   const isDirty = jest.fn().mockReturnValue(true)
+  const { getDocument } = BaseEntity.prototype
 
   const get = jest
     .fn()
@@ -81,8 +87,9 @@ test('BaseEntity#save remove previous doc', async () => {
 
   const { _rev } = await BaseEntity.prototype.save.call({
     isDirty,
+    getDocument,
     __protoData: {
-      fields: [{ key: '_id' }, { key: 'name' }]
+      fields: [{ key: '_id', docKey: '_id' }, { key: 'name', docKey: 'name' }]
     },
     sloth: {
       factory,
@@ -108,6 +115,7 @@ test('BaseEntity#save remove previous doc', async () => {
 
 test('BaseEntity#save throws error if not not_found', async () => {
   const isDirty = jest.fn().mockReturnValue(true)
+  const { getDocument } = BaseEntity.prototype
 
   const get = jest.fn().mockRejectedValue(new Error('foo_error'))
   const put = jest.fn().mockResolvedValue(null)
@@ -116,6 +124,7 @@ test('BaseEntity#save throws error if not not_found', async () => {
 
   await expect(
     BaseEntity.prototype.save.apply({
+      getDocument,
       isDirty,
       __protoData: {
         fields: [{ key: '_id' }, { key: 'name' }]
@@ -302,4 +311,42 @@ test('BaseEntity#removeRelations remove parent if no child', async () => {
   expect(factory).toHaveBeenCalledWith(name)
   expect(remove).toHaveBeenCalled()
   expect(belongsTo).toHaveBeenCalled()
+})
+
+test('BaseEntity#getProps returns props', () => {
+  const doc = BaseEntity.prototype.getProps.call({
+    __protoData: {
+      fields: [{ key: 'name' }, { key: '_id' }, { key: 'foo' }]
+    },
+    name: 'John',
+    _id: 'john',
+    foo: 'bar'
+  })
+
+  expect(doc).toEqual({
+    name: 'John',
+    _id: 'john',
+    foo: 'bar'
+  })
+})
+
+test('BaseEntity#getDocument returns props', () => {
+  const doc = BaseEntity.prototype.getDocument.call({
+    __protoData: {
+      fields: [
+        { key: 'name', docKey: 'not_name' },
+        { key: '_id', docKey: '_id' },
+        { key: 'foo', docKey: 'bar' }
+      ]
+    },
+    name: 'John',
+    _id: 'john',
+    foo: 'bar'
+  })
+
+  expect(doc).toEqual({
+    not_name: 'John',
+    _id: 'john',
+    bar: 'bar'
+  })
 })

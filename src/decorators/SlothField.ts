@@ -10,9 +10,12 @@ import getProtoData from '../utils/getProtoData'
  *  - mutating the value will update it in updatedProps
  *  - accessing the value will first look into updatedProps, then props and then default values
  * @typeparam T the value type
+ * @param docKeyName specifies the document key name, default to prop key name
  */
-export default function SlothField<T>() {
+export default function SlothField<T>(docKeyName?: string) {
   return function(this: any, target: object, key: string) {
+    const docKey = docKeyName || key
+
     const desc = Reflect.getOwnPropertyDescriptor(target, key)
     let defaultValue: T
 
@@ -24,18 +27,18 @@ export default function SlothField<T>() {
 
     const data = getProtoData(target, true)
 
-    data.fields.push({ key })
+    data.fields.push({ key, docKey })
 
     Reflect.deleteProperty(target, key)
 
     Reflect.defineProperty(target, key, {
       get: function(): T {
         const { updatedProps, props } = getSlothData(this)
-        if (key in updatedProps) {
-          return (updatedProps as any)[key]
+        if (docKey in updatedProps) {
+          return (updatedProps as any)[docKey]
         }
-        if (key in props) {
-          return (props as any)[key]
+        if (docKey in props) {
+          return (props as any)[docKey]
         }
         return defaultValue
       },
@@ -48,7 +51,7 @@ export default function SlothField<T>() {
           return
         }
 
-        Object.assign(getSlothData(this).updatedProps, { [key]: value })
+        Object.assign(getSlothData(this).updatedProps, { [docKey]: value })
       }
     })
   }
