@@ -17,7 +17,11 @@ describe('changes#subscribe', () => {
 
     await Artist.create(factory, { name: 'foo' }).save()
 
-    await delay(10)
+    let i = 0
+
+    do {
+      await delay(250)
+    } while (i++ < 120 && subscriber.mock.calls.length === 0)
 
     const { calls } = subscriber.mock
 
