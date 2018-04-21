@@ -17,7 +17,6 @@ export default function SlothField<T>(docKeyName?: string) {
     const docKey = docKeyName || key
 
     const desc = Reflect.getOwnPropertyDescriptor(target, key)
-    let defaultValue: T
 
     if (desc) {
       if (desc.get || desc.set) {
@@ -32,26 +31,34 @@ export default function SlothField<T>(docKeyName?: string) {
     Reflect.deleteProperty(target, key)
 
     Reflect.defineProperty(target, key, {
-      get: function(): T {
-        const { updatedProps, props } = getSlothData(this)
+      enumerable: true,
+      get: function(): T | undefined {
+        const { updatedProps, props = {}, defaultProps } = getSlothData(this)
         if (docKey in updatedProps) {
           return (updatedProps as any)[docKey]
         }
         if (docKey in props) {
           return (props as any)[docKey]
         }
-        return defaultValue
+        return (defaultProps as any)[docKey]
       },
       set: function(value: T) {
-        // Typescript calls this function before class decorator
-        // Thus, when assigning default values in constructor we can get it and write it down
-        // However this should only happen once to avoid missing bugs
-        if (!('sloth' in this) && (!defaultValue || defaultValue === value)) {
-          defaultValue = value
+        const { props, defaultProps, updatedProps } = getSlothData<any>(this)
+
+        if (!props) {
+          defaultProps[docKey] = value
+
           return
         }
 
-        Object.assign(getSlothData(this).updatedProps, { [docKey]: value })
+        if (docKey in defaultProps && value == null) {
+          delete props[docKey]
+          delete updatedProps[docKey]
+
+          return
+        }
+
+        Object.assign(updatedProps, { [docKey]: value })
       }
     })
   }

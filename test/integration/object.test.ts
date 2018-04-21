@@ -49,6 +49,7 @@ describe('nested objects', () => {
         barz: 'foobarbarz'
       }
     })
+
     expect(await factory('foos').get('foos/foobar')).toMatchObject({
       name: 'Foobar',
       foo: {

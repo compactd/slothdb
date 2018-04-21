@@ -4,17 +4,49 @@ import getProtoData from '../utils/getProtoData'
 import Dict from '../helpers/Dict'
 import { RelationDescriptor } from './relationDescriptors'
 import { join } from 'path'
+import SlothData from './SlothData'
+import ProtoData from './ProtoData'
+import Debug from 'debug'
+
+const debug = Debug('slothdb')
+
+const slug = require('limax')
 
 /**
  * Base abstract entity, for all entitoies
  * The generic parameter S is the schema of the document
  * @typeparam S the document schema
  */
-export default class BaseEntity<S> {
+export default class BaseEntity<S extends { _id: string }> {
   _id: string = ''
-  // tslint:disable-next-line:no-empty
-  constructor(factory: PouchFactory<S>, idOrProps: Partial<S> | string) {}
 
+  private sloth: SlothData<S>
+  // tslint:disable-next-line:no-empty
+  constructor(factory: PouchFactory<S>, idOrProps: Partial<S> | string) {
+    const { name } = getProtoData(this)
+    if (!name) {
+      throw new Error('Please use SlothEntity')
+    }
+    if (typeof idOrProps === 'string') {
+      this.sloth = {
+        name,
+        updatedProps: {},
+        defaultProps: {},
+        docId: idOrProps,
+        factory,
+        slug
+      }
+    } else {
+      this.sloth = {
+        name,
+        defaultProps: {},
+        updatedProps: {},
+        docId: idOrProps._id,
+        factory,
+        slug
+      }
+    }
+  }
   /**
    * Returns whether this document hhas unsaved updated properties
    */
@@ -64,10 +96,13 @@ export default class BaseEntity<S> {
    *     then no _rev property is returned
    */
   async save(): Promise<S & { _rev?: string }> {
+    debug('save document "%s"', this._id)
+
     const { fields } = getProtoData(this, false)
     const doc = this.getDocument()
 
     if (!this.isDirty()) {
+      debug('document "%s" is not dirty, skippping saving', this._id)
       return doc
     }
 
@@ -76,6 +111,12 @@ export default class BaseEntity<S> {
 
     try {
       const { _rev } = await db.get(this._id)
+
+      debug(
+        'document "%s" already exists with revision "%s", updating...',
+        this._id,
+        _rev
+      )
 
       const { rev } = await db.put(Object.assign({}, doc, { _rev }))
 
@@ -87,13 +128,20 @@ export default class BaseEntity<S> {
 
       if (err.name === 'not_found') {
         if (docId) {
+          debug(
+            'document "%s" was renamed to "%s", removing old document',
+            docId,
+            this._id
+          )
           // We need to delete old doc
           const originalDoc = await db.get(docId)
           await db.remove(originalDoc)
 
           getSlothData(this).docId = this._id
         }
+
         const { rev, id } = await db.put(doc)
+        debug('document "%s" rev "%s" was created', this._id, rev)
 
         getSlothData(this).docId = this._id
 

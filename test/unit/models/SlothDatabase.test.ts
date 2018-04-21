@@ -3,7 +3,9 @@ import localPouchFactory from '../../utils/localPouchFactory'
 import emptyProtoData from '../../utils/emptyProtoData'
 
 test('SlothDatabase#constructor - sets the db name from desc', () => {
-  const db1 = new SlothDatabase({ desc: { name: 'foos' } } as any)
+  const db1 = new SlothDatabase({
+    prototype: { __protoData: { name: 'foos' } }
+  } as any)
 
   expect((db1 as any)._name).toBe('foos')
 })
@@ -11,7 +13,7 @@ test('SlothDatabase#constructor - sets the db name from desc', () => {
 test('SlothDatabase#constructor - throws without a desc', () => {
   expect(() => {
     const db1 = new SlothDatabase({} as any)
-  }).toThrowError(/SlothEntity/)
+  }).toThrowError(/Cannot read property '__protoData' of undefined/)
 })
 
 test('SlothDatabase#create - create a model instance with props', async () => {

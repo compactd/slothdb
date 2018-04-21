@@ -1,4 +1,5 @@
 import SlothField from '../../../src/decorators/SlothField'
+import emptyProtoData from '../../utils/emptyProtoData'
 
 test('SlothField - fails on a defined property using get', () => {
   const object = {}
@@ -65,24 +66,36 @@ test('SlothField - uses props if not updated', () => {
 })
 
 test('SlothField - uses default value', () => {
-  const object: { foobar: string; sloth?: any } = {
-    foobar: ''
+  const object: any = {
+    foobar: '',
+    sloth: {
+      defaultProps: {},
+      updatedProps: {}
+    },
+    __protoData: emptyProtoData({
+      fields: [{ key: 'foobar', docKey: 'foobar' }]
+    }),
+    props: null
   }
 
   SlothField()(object, 'foobar')
   object.foobar = 'default'
 
-  expect(() => (object.foobar = 'notsofast')).toThrowError(/SlothEntity/)
+  expect(object.foobar).toBe('default')
 
-  object.sloth = { updatedProps: {}, props: {} }
+  object.sloth.props = {}
+  object.foobar = 'foobar'
+
+  expect(object.foobar).toBe('foobar')
+  object.foobar = null
 
   expect(object.foobar).toBe('default')
 })
 
-test('SlothField - updated updatedProps', () => {
+test('SlothField - update updatedProps', () => {
   const object = {
     foobar: '',
-    sloth: { updatedProps: {}, props: {} }
+    sloth: { updatedProps: {}, props: {}, defaultProps: {} }
   }
 
   SlothField()(object, 'foobar')

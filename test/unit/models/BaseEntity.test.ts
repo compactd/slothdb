@@ -1,5 +1,7 @@
 import BaseEntity from '../../../src/models/BaseEntity'
 import { RelationDescriptor } from '../../../src/models/relationDescriptors'
+import SlothEntity from '../../../src/decorators/SlothEntity'
+import emptyProtoData from '../../utils/emptyProtoData'
 
 test('BaseEntity#isDirty returns false without any updated props', () => {
   expect(
@@ -348,5 +350,99 @@ test('BaseEntity#getDocument returns props', () => {
     not_name: 'John',
     _id: 'john',
     bar: 'bar'
+  })
+})
+
+describe('BaseEntity#constructor', () => {
+  // tslint:disable-next-line:no-empty
+  const constr = () => {}
+  const localPouchFactory = () => null
+
+  test('set the props when props are passed', () => {
+    const context: any = {
+      __protoData: emptyProtoData({
+        name: 'foo',
+        fields: [{ key: 'foo', docKey: 'foo' }]
+      }),
+      name: 'foo',
+      props: {}
+    }
+
+    BaseEntity.call(context, localPouchFactory, { foo: 'bar' })
+
+    expect(context.sloth).toBeDefined()
+    expect(context.sloth.name).toBe('foo')
+    expect(context.sloth.docId).toBeUndefined()
+  })
+  test('can use keys', () => {
+    // tslint:disable-next-line:no-empty
+    const constr = () => {}
+
+    const context: any = {
+      name: 'foo',
+      __protoData: emptyProtoData({
+        name: 'foo',
+        fields: [{ key: 'foo', docKey: 'barz' }]
+      })
+    }
+
+    BaseEntity.call(context, localPouchFactory, { foo: 'bar' })
+
+    expect(context.sloth).toBeDefined()
+    expect(context.sloth.name).toBe('foo')
+    expect(context.sloth.docId).toBeUndefined()
+  })
+  test('can use docKeys', () => {
+    // tslint:disable-next-line:no-empty
+    const constr = () => {}
+
+    const context: any = {
+      name: 'foo',
+      __protoData: emptyProtoData({
+        name: 'foo',
+        fields: [{ key: 'foo', docKey: 'barz' }]
+      })
+    }
+
+    BaseEntity.call(context, localPouchFactory, { barz: 'bar' })
+
+    expect(context.sloth).toBeDefined()
+    expect(context.sloth.name).toBe('foo')
+    expect(context.sloth.docId).toBeUndefined()
+  })
+  test('eventually set docId when props are passed with _id', () => {
+    // tslint:disable-next-line:no-empty
+    const constr = () => {}
+
+    const context: any = {
+      name: 'foo',
+      __protoData: emptyProtoData({
+        name: 'foo',
+        fields: [{ key: 'foo', docKey: 'foo' }, { key: '_id', docKey: '_id' }]
+      })
+    }
+
+    BaseEntity.call(context, localPouchFactory, { _id: 'foobar', foo: 'bar' })
+
+    expect(context.sloth).toBeDefined()
+    expect(context.sloth.name).toBe('foo')
+    expect(context.sloth.updatedProps).toEqual({})
+    expect(context.sloth.docId).toBe('foobar')
+  })
+  test('set the docId only when string is passed', () => {
+    // tslint:disable-next-line:no-empty
+    const constr = () => {}
+
+    const context: any = {
+      name: 'foo',
+      __protoData: emptyProtoData({ name: 'foo' })
+    }
+
+    BaseEntity.call(context, localPouchFactory, 'foobar')
+
+    expect(context.sloth).toBeDefined()
+    expect(context.sloth.name).toBe('foo')
+    expect(context.sloth.updatedProps).toEqual({})
+    expect(context.sloth.docId).toBe('foobar')
   })
 })

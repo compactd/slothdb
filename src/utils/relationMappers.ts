@@ -2,7 +2,10 @@ import getProtoData from './getProtoData'
 import PouchFactory from '../models/PouchFactory'
 import BaseEntity from '../models/BaseEntity'
 
-export function belongsToMapper<S>(target: any, keyName: string) {
+export function belongsToMapper<S extends { _id: string }>(
+  target: any,
+  keyName: string
+) {
   return (factory: PouchFactory<S>): Promise<BaseEntity<S>> => {
     const { rels } = getProtoData(target)
 

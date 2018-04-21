@@ -9,11 +9,10 @@ import { inspect } from 'util'
  * @private
  */
 export default function getSlothData<S>(obj: object) {
-  // console.trace(obj);
   const wrapped = obj as { sloth: SlothData<S> }
 
   if (!wrapped.sloth) {
-    throw new Error('Please use SlothEntity')
+    throw new Error(`Class ${wrapped} does not extend SlothEntity`)
   }
 
   return wrapped.sloth

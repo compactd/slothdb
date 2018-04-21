@@ -15,7 +15,7 @@ export default interface SlothData<S> {
   /**
    * Loaded properties from database or constructor
    */
-  props: Partial<S>
+  props?: Partial<S>
   /**
    * Properties updated at runtime
    */
@@ -28,6 +28,8 @@ export default interface SlothData<S> {
    * A slug function that slugifies a string, should move this
    */
   slug: (str: string) => string
+
+  defaultProps: Partial<S>
 
   factory: PouchFactory<S>
 }

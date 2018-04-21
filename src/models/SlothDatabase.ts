@@ -17,7 +17,7 @@ const debug = Debug('slothdb')
  * @typeparam V the (optional) view type that defines a list of possible view IDs
  */
 export default class SlothDatabase<
-  S,
+  S extends { _id: string },
   E extends BaseEntity<S>,
   V extends string = never
 > {
@@ -54,11 +54,14 @@ export default class SlothDatabase<
   constructor(model: EntityConstructor<S, E>, root: string = '') {
     this._model = model
     this._root = root
-    if (model.desc && model.desc.name) {
-      this._name = model.desc.name
-    } else {
-      throw new Error('Please use SlothEntity')
+
+    const { name } = getProtoData(model.prototype)
+
+    if (!name) {
+      throw new Error('SlothEntity decorator is required')
     }
+
+    this._name = name
   }
 
   /**

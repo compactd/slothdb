@@ -1,14 +1,14 @@
 import BaseEntity from '../models/BaseEntity'
 import SlothData from '../models/SlothData'
-import StaticData from '../models/StaticData'
 import PouchFactory from '../models/PouchFactory'
 import EntityConstructor from '../helpers/EntityConstructor'
 import getProtoData from '../utils/getProtoData'
 import ProtoData from '../models/ProtoData'
 
-const slug = require('limax')
-
 function mapPropsOrDocToDocument({ fields }: ProtoData, data: any) {
+  if (typeof data === 'string') {
+    return {}
+  }
   return fields.reduce(
     (props, { key, docKey }) => {
       if (!(key in data) && !(docKey in data)) {
@@ -36,40 +36,21 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
   return <T extends BaseEntity<S>>(constructor: {
     new (factory: PouchFactory<S>, idOrProps: Partial<S> | string): T
   }) => {
-    const constr = (constructor as any) as { desc: StaticData }
-
-    constr.desc = { name }
-
     const data = getProtoData(constructor.prototype, true)
 
     data.name = name
 
-    class WrappedEntity extends (constructor as EntityConstructor<any, any>) {
-      sloth: SlothData<S>
-
+    return class WrappedEntity extends constructor as EntityConstructor<
+      any,
+      any
+    > {
       constructor(factory: PouchFactory<S>, idOrProps: Partial<S> | string) {
         super(factory, idOrProps)
-        if (typeof idOrProps === 'string') {
-          this.sloth = {
-            name,
-            updatedProps: {},
-            props: {},
-            docId: idOrProps,
-            factory,
-            slug
-          }
-        } else {
-          this.sloth = {
-            name,
-            updatedProps: {},
-            props: mapPropsOrDocToDocument(getProtoData(this), idOrProps),
-            docId: idOrProps._id,
-            factory,
-            slug
-          }
-        }
+        this.sloth.props = mapPropsOrDocToDocument(
+          getProtoData(this),
+          idOrProps
+        )
       }
     }
-    return WrappedEntity as any
   }
 }
