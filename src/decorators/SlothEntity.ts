@@ -39,11 +39,8 @@ export default function SlothEntity<S extends { _id: string }>(name: string) {
     const data = getProtoData(constructor.prototype, true)
 
     data.name = name
-
-    return class WrappedEntity extends constructor as EntityConstructor<
-      any,
-      any
-    > {
+    const BaseEntity = constructor as EntityConstructor<any, any>
+    return class WrappedEntity extends BaseEntity {
       constructor(factory: PouchFactory<S>, idOrProps: Partial<S> | string) {
         super(factory, idOrProps)
         this.sloth.props = mapPropsOrDocToDocument(
