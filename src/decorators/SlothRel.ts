@@ -27,7 +27,10 @@ export default function SlothRel(rel: RelationDescriptor) {
 
     const { fields, rels } = getProtoData(target, true)
 
-    fields.push({ key, docKey: key })
+    if ('belongsTo' in rel) {
+      fields.push({ key, docKey: key })
+    }
+
     rels.push({ ...rel, key })
 
     Reflect.deleteProperty(target, key)
