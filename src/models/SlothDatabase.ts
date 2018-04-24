@@ -44,6 +44,8 @@ export default class SlothDatabase<
     changes: PouchDB.Core.Changes<S>
   }[] = []
 
+  private _setupPromise?: Promise<any>
+
   /**
    * Create a new database instance
    * @param factory the pouch factory to use
@@ -57,13 +59,57 @@ export default class SlothDatabase<
 
     const { name } = getProtoData(model.prototype)
 
+    /* istanbul ignore if  */
     if (!name) {
       throw new Error('SlothEntity decorator is required')
     }
 
     this._name = name
   }
+  /**
+   * Run a query 
+   * 
+   * @param factory the pouch factory
+   * @param view the view identifier
+   * @param startKey the optional startkey
+   * @param endKey the optional endkey
+   * @param includeDocs include_docs
+   */
+  query(
+    factory: PouchFactory<S>,
+    view: V,
+    startKey = '',
+    endKey = join(startKey, '\uffff'),
+    includeDocs = false
+  ): Promise<PouchDB.Query.Response<S>> {
+    return factory(this._name)
+      .query<S>(view, {
+        startkey: startKey,
+        endkey: endKey,
+        include_docs: includeDocs
+      })
+      .catch(err => {
+        if (err.name === 'not_found') {
+          debug(`Design document '%s' is missing, generating views...`, view)
 
+          /* istanbul ignore if  */
+          if (this._setupPromise) {
+            this._setupPromise.then(() => {
+              return this.query(factory, view, startKey, endKey, includeDocs)
+            })
+          }
+
+          this._setupPromise = this.initSetup(factory)
+
+          return this._setupPromise.then(() => {
+            debug('Created design documents')
+            this._setupPromise = undefined
+            return this.query(factory, view, startKey, endKey, includeDocs)
+          })
+        }
+        throw err
+      })
+  }
   /**
    * Queries and maps docs to Entity objects
    * 
@@ -78,25 +124,15 @@ export default class SlothDatabase<
     startKey = '',
     endKey = join(startKey, '\uffff')
   ): Promise<E[]> {
-    return factory(this._name)
-      .query(view, {
-        startkey: startKey,
-        endkey: endKey,
-        include_docs: true
-      })
-      .then(({ rows }) => {
-        return rows.map(({ doc }) => new this._model(factory, doc as any))
-      })
-      .catch(err => {
-        if (err.name === 'not_found') {
-          debug(`Design document '%s' is missing, generating views...`, view)
-          return this.initSetup(factory).then(() => {
-            debug('Created design documents')
-            return this.queryDocs(factory, view, startKey, endKey)
-          })
-        }
-        throw err
-      })
+    return this.query(
+      factory,
+      view,
+      startKey,
+      endKey,
+      true
+    ).then(({ rows }) => {
+      return rows.map(({ doc }) => new this._model(factory, doc as any))
+    })
   }
 
   /**
@@ -113,25 +149,15 @@ export default class SlothDatabase<
     startKey = '',
     endKey = join(startKey, '\uffff')
   ): Promise<string[]> {
-    return factory(this._name)
-      .query(view, {
-        startkey: startKey,
-        endkey: endKey,
-        include_docs: false
-      })
-      .then(({ rows }) => {
-        return rows.map(({ key }) => key)
-      })
-      .catch(err => {
-        if (err.name === 'not_found') {
-          debug(`Design document '%s' is missing, generating views...`, view)
-          return this.initSetup(factory).then(() => {
-            debug('Created design documents')
-            return this.queryKeys(factory, view, startKey, endKey)
-          })
-        }
-        throw err
-      })
+    return this.query(
+      factory,
+      view,
+      startKey,
+      endKey,
+      false
+    ).then(({ rows }) => {
+      return rows.map(({ key }) => key)
+    })
   }
 
   /**
@@ -148,28 +174,18 @@ export default class SlothDatabase<
     startKey = '',
     endKey = join(startKey, '\uffff')
   ): Promise<Dict<string>> {
-    return factory(this._name)
-      .query(view, {
-        startkey: startKey,
-        endkey: endKey,
-        include_docs: false
-      })
-      .then(({ rows }) => {
-        return rows.reduce(
-          (acc, { key, id }) => ({ ...acc, [key]: id }),
-          {} as Dict<string>
-        )
-      })
-      .catch(err => {
-        if (err.name === 'not_found') {
-          debug(`Design document '%s' is missing, generating views...`, view)
-          return this.initSetup(factory).then(() => {
-            debug('Created design documents')
-            return this.queryKeysIDs(factory, view, startKey, endKey)
-          })
-        }
-        throw err
-      })
+    return this.query(
+      factory,
+      view,
+      startKey,
+      endKey,
+      false
+    ).then(({ rows }) => {
+      return rows.reduce(
+        (acc, { key, id }) => ({ ...acc, [key]: id }),
+        {} as Dict<string>
+      )
+    })
   }
 
   /**
