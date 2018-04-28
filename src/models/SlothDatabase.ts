@@ -78,8 +78,10 @@ export default class SlothDatabase<
   query(
     factory: PouchFactory<S>,
     view: V,
-    startKey = '',
-    endKey = join(startKey, '\uffff'),
+    startKey?: any,
+    endKey: any = typeof startKey === 'string'
+      ? join(startKey, '\uffff')
+      : undefined,
     includeDocs = false
   ): Promise<PouchDB.Query.Response<S>> {
     return factory(this._name)
@@ -121,8 +123,8 @@ export default class SlothDatabase<
   queryDocs(
     factory: PouchFactory<S>,
     view: V,
-    startKey = '',
-    endKey = join(startKey, '\uffff')
+    startKey?: any,
+    endKey?: any
   ): Promise<E[]> {
     return this.query(
       factory,
@@ -146,8 +148,8 @@ export default class SlothDatabase<
   queryKeys(
     factory: PouchFactory<S>,
     view: V,
-    startKey = '',
-    endKey = join(startKey, '\uffff')
+    startKey?: any,
+    endKey?: any
   ): Promise<string[]> {
     return this.query(
       factory,
@@ -171,8 +173,8 @@ export default class SlothDatabase<
   queryKeysIDs(
     factory: PouchFactory<S>,
     view: V,
-    startKey = '',
-    endKey = join(startKey, '\uffff')
+    startKey?: any,
+    endKey?: any
   ): Promise<Dict<string>> {
     return this.query(
       factory,
