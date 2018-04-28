@@ -66,6 +66,27 @@ export default class SlothDatabase<
 
     this._name = name
   }
+
+  /**
+   * Join URI params provided as specified by SlothURI
+   * Useful to recreate document id from URL params
+   * Please note that 
+   * @param props the props 
+   * @param field 
+   */
+  joinURIParams(props: Partial<S>, field = '_id') {
+    const idURI = getProtoData(this._model.prototype).uris.find(
+      ({ name }) => name === field
+    )
+    if (!idURI) {
+      throw new Error(`Field ${field} not found in URIs`)
+    }
+    return join(
+      idURI.prefix,
+      ...idURI.propsKeys.map(key => (props as any)[key])
+    )
+  }
+
   /**
    * Run a query 
    * 

@@ -77,7 +77,9 @@ test('remove parent if last child is removed', async () => {
   })
   await expect(
     db.get('library/flatbush-zombies/betteroffdead')
-  ).rejects.toMatchObject({ message: 'missing' })
+  ).rejects.toMatchObject({
+    message: 'missing'
+  })
 })
 
 test('doesnt remove parent if still has children', async () => {
@@ -137,7 +139,9 @@ test('doesnt remove parent if still has children', async () => {
 
   await expect(
     db.get('library/flatbush-zombies/betteroffdead')
-  ).rejects.toMatchObject({ message: 'missing' })
+  ).rejects.toMatchObject({
+    message: 'missing'
+  })
 })
 
 test('rels.artist - maps with artist', async () => {
@@ -159,4 +163,10 @@ test('rels.artist - maps with artist', async () => {
 
   expect(flatbush._id).toBe('library/flatbush-zombies')
   expect(flatbush.name).toBe('Flatbush Zombies')
+})
+
+test('joinURIParams', () => {
+  expect(
+    Album.joinURIParams({ name: 'betteroffdead', artist: 'flatbush-zombies' })
+  ).toBe('library/flatbush-zombies/betteroffdead')
 })
