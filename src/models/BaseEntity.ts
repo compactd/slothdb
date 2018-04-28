@@ -10,7 +10,8 @@ import Debug from 'debug'
 
 const debug = Debug('slothdb')
 
-const slug = require('limax')
+const limax = require('limax')
+const slug = (text: string) => limax(text, { separateNumbers: false })
 
 /**
  * Base abstract entity, for all entitoies
