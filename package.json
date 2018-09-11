@@ -110,7 +110,7 @@
     "validate-commit-msg": "^2.12.2"
   },
   "dependencies": {
-    "debug": "^3.1.0",
+    "debug": "^4.0.0",
     "limax": "^1.6.0"
   }
 }
