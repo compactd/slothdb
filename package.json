@@ -73,7 +73,7 @@
     "collectCoverage": true
   },
   "devDependencies": {
-    "@types/jest": "^23.0.0",
+    "@types/jest": "^24.0.0",
     "@types/joi": "^13.0.5",
     "@types/node": "^10.0.3",
     "@types/pouchdb": "^6.3.2",
