@@ -83,7 +83,7 @@
     "coveralls": "^3.0.0",
     "cross-env": "^5.0.1",
     "cz-conventional-changelog": "^2.0.0",
-    "husky": "^0.14.0",
+    "husky": "^2.0.0",
     "jest": "^22.0.2",
     "lint-staged": "^7.0.0",
     "lodash.camelcase": "^4.3.0",
