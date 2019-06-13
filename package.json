@@ -87,7 +87,7 @@
     "jest": "^22.0.2",
     "lint-staged": "^7.0.0",
     "lodash.camelcase": "^4.3.0",
-    "pouchdb": "^6.4.3",
+    "pouchdb": "^7.1.0",
     "pouchdb-adapter-memory": "^6.4.3",
     "prettier": "^1.4.4",
     "prompt": "^1.0.0",
